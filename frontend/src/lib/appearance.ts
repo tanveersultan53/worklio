@@ -218,12 +218,21 @@ export const THEMES: ThemePreset[] = [
       sideForeground: "rgb(255 255 255 / 0.75)",
       sideStrong: "#ffffff",
       sideHover: "rgb(255 255 255 / 0.08)",
-      active: "#1164a3",
-      activeForeground: "#ffffff",
+      // Like Slack today: the selected item is a soft light pill with plum text, not blue.
+      active: "#f6e9f5",
+      activeForeground: "#3a1238",
       badge: "#cd2553",
       tab: "#44193f",
     },
-    dark: { frame: gradient("#1d0f1c", "#1d0f1c", "#1d0f1c"), chrome: "#1d0f1c", ...darkSide("#261424"), active: "#1164a3", badge: "#cd2553", tab: "#d8a6d4" },
+    dark: {
+      frame: gradient("#1d0f1c", "#1d0f1c", "#1d0f1c"),
+      chrome: "#1d0f1c",
+      ...darkSide("#261424"),
+      active: "#e6d7e5",
+      activeForeground: "#2a0f28",
+      badge: "#cd2553",
+      tab: "#d8a6d4",
+    },
   },
 
   /* ---------- Premium collection ---------- */
