@@ -1,0 +1,9 @@
+# Shows the "Sponsor" button on the repository page.
+# https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+github: [tanveersultan53]
+
+# Uncomment and fill in once each account exists:
+# open_collective: worklio            # your Open Collective slug
+# buy_me_a_coffee: your-username      # buymeacoffee.com/your-username
+# ko_fi: your-username                # ko-fi.com/your-username
+# custom: ["https://example.com/donate"]   # PayPal or your own page
