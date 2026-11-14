@@ -819,12 +819,29 @@ export const ai = {
 
 // --- Text helpers ----------------------------------------------------------------------------
 
-/** Citation markers like [1] or [1, 3] in model text. */
-export const CITATION_RE = /\[(\d{1,3}(?:\s*,\s*\d{1,3})*)\](?!\()/g;
+/** Citation markers like [1], [1, 3] or ranges [1–4] / [2, 5-7] in model text. */
+export const CITATION_RE = /\[(\d{1,3}(?:\s*[,–-]\s*\d{1,3})*)\](?!\()/g;
+
+/** "[5]–[9]" (a range written between two markers) → "[5–9]", so it reads as one group. */
+export function joinCitationRanges(text: string): string {
+  return text.replace(/\[(\d{1,3})\]\s*[–-]\s*\[(\d{1,3})\]/g, "[$1–$2]");
+}
+
+/** The numbers inside one marker: "1–4" → [1,2,3,4], "2, 5-6" → [2,5,6]. At most 8. */
+export function citationNumbers(inside: string): number[] {
+  const out: number[] = [];
+  for (const part of inside.split(",")) {
+    const [a, b] = part.split(/[–-]/).map((x) => Number(x.trim()));
+    if (!Number.isFinite(a)) continue;
+    const end = Number.isFinite(b) && b >= a && b - a < 20 ? b : a;
+    for (let n = a; n <= end && out.length < 8; n++) if (!out.includes(n)) out.push(n);
+  }
+  return out;
+}
 
 /** Model markdown → Worklio message markup (for "Post to channel"); drops citation markers. */
 export function markdownToMessage(md: string): string {
-  return md
+  return joinCitationRanges(md)
     .replace(CITATION_RE, "")
     .split("\n")
     .map((line) => {

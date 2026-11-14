@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 import { useGroupsById } from "@/components/messaging/use-groups";
 import { useWorkspace } from "@/components/workspace/provider";
-import { CITATION_RE, type AICitation } from "@/lib/ai";
+import { CITATION_RE, citationNumbers, joinCitationRanges, type AICitation } from "@/lib/ai";
 import { formatMessage, type MentionGroup } from "@/lib/format";
 import type { Member } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,8 @@ const INLINE_RE = new RegExp(`${CITATION_RE.source}|\\[([^\\]\\n]+)\\]\\((https?
 /** Markdown emphasis → message markup that formatMessage understands. */
 const normalize = (s: string) => s.replace(/\*\*(?=\S)(.+?)(?<=\S)\*\*/g, "*$1*").replace(/__(?=\S)(.+?)(?<=\S)__/g, "_$1_");
 
-function inline(text: string, ctx: Ctx, key: string): ReactNode[] {
+function inline(raw: string, ctx: Ctx, key: string): ReactNode[] {
+  const text = joinCitationRanges(raw);
   const out: ReactNode[] = [];
   let last = 0;
   let i = 0;
@@ -44,9 +45,18 @@ function inline(text: string, ctx: Ctx, key: string): ReactNode[] {
     const start = m.index ?? 0;
     fmt(text.slice(last, start), `${key}-t${i}`);
     if (m[1]) {
-      for (const raw of m[1].split(",")) {
-        const n = Number(raw.trim());
-        out.push(<CitationChip key={`${key}-c${i}-${n}`} n={n} citation={ctx.citations.get(n)} onJump={ctx.onCite} />);
+      const nums = citationNumbers(m[1]);
+      const isRange = nums.length > 2 && nums.every((n, j) => j === 0 || n === nums[j - 1] + 1);
+      if (isRange) {
+        // A run like 6–12 is one chip (opens the first source); the full list is under "sources".
+        const n = nums[0];
+        out.push(
+          <CitationChip key={`${key}-c${i}-r`} n={n} label={`${n}–${nums[nums.length - 1]}`} citation={ctx.citations.get(n)} onJump={ctx.onCite} />,
+        );
+      } else {
+        for (const n of nums) {
+          out.push(<CitationChip key={`${key}-c${i}-${n}`} n={n} citation={ctx.citations.get(n)} onJump={ctx.onCite} />);
+        }
       }
     } else if (m[2] && m[3]) {
       out.push(

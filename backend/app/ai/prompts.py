@@ -34,6 +34,7 @@ Citations:
 message, put its number right after the statement: "The launch moved to May 2 [3]." Cite \
 several as [3][7]. Cite the most specific message, usually the one where something was \
 decided or said first.
+- Write every number separately: [3][4][5]. Never a range like [3–5] or [3]–[5].
 - Only cite numbers you were actually shown. Never cite a number for something you inferred.
 """
 
