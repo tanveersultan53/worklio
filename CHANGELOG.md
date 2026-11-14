@@ -31,6 +31,7 @@ versions may include breaking changes.
   replies are paged and search has "Show more results".
 - New message dialog offers "Invite people" when you're alone in a workspace.
 - README logo and screenshots, and `scripts/seed_demo.py` to recreate the demo workspace.
+- `GOVERNANCE.md`: contributor roles, decision making and the rules protecting `main`.
 - Workspace URLs are generated from the name on creation (unique, lowercase letters, numbers and
   dashes).
 
