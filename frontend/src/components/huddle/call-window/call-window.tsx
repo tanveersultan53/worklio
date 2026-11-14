@@ -487,13 +487,6 @@ export function CallWindow({
                 onAnnotatingChange={setAnnotating}
               />
 
-              {captionsShown && (
-                <CaptionsOverlay
-                  speakers={captionFeed.speakers}
-                  notice={captionsNotice}
-                  className="absolute inset-x-0 bottom-[76px] z-20 sm:bottom-[84px]"
-                />
-              )}
 
               {/* Floating notices over the stage */}
               <div className="pointer-events-none absolute inset-x-0 top-2 z-30 flex flex-col items-center gap-2 px-3">
@@ -545,6 +538,11 @@ export function CallWindow({
                   onOpen={() => setPanel("chat")}
                   onDismiss={chat.dismissPreview}
                 />
+              )}
+
+              {/* Captions get their own strip under the stage, so they never cover anyone's face. */}
+              {captionsShown && (
+                <CaptionsOverlay speakers={captionFeed.speakers} notice={captionsNotice} className="mt-2" />
               )}
 
               <div className="pt-3">

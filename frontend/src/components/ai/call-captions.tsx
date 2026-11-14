@@ -329,8 +329,10 @@ export function useCaptionFeed(callId: string | null, meId: string | null | unde
 // -------------------------------------------------------------------------------------------------
 
 /**
- * The caption overlay at the bottom of the call stage. `notice` explains why MY speech isn't being
- * captioned (unsupported browser, muted); others' captions still show.
+ * The captions strip between the call stage and the controls. It keeps a fixed height while
+ * captions are on, so the video doesn't jump as people start and stop talking. Newest speaker at
+ * the bottom; each speaker shows their last line or two. `notice` explains why MY speech isn't
+ * being captioned (unsupported browser, muted); others' captions still show.
  */
 export function CaptionsOverlay({
   speakers,
@@ -342,76 +344,59 @@ export function CaptionsOverlay({
   className?: string;
 }) {
   const { me, memberById } = useWorkspace();
-  const anyVisible = speakers.some((s) => s.visible);
+  const shown = speakers.filter((s) => s.visible).slice(-2);
   return (
-    <div
+    <section
       aria-label="Live captions"
-      className={cn("pointer-events-none flex flex-col items-center gap-1.5 px-3", className)}
+      aria-live="polite"
+      className={cn(
+        "relative mx-auto flex h-[104px] w-full max-w-[880px] shrink-0 flex-col justify-end gap-2 overflow-hidden rounded-2xl bg-black/55 px-4 py-3 ring-1 ring-white/[0.08] sm:h-[112px] sm:px-5",
+        className,
+      )}
     >
       {notice && (
         <span
           role="status"
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium ring-1 backdrop-blur-xl animate-in fade-in-0 duration-300",
+            "absolute top-2.5 right-3 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",
             notice.kind === "unsupported"
               ? "bg-amber-400/15 text-amber-100 ring-amber-300/25"
-              : "bg-zinc-900/80 text-white/75 ring-white/10",
+              : "bg-white/[0.06] text-white/65 ring-white/10",
           )}
         >
           {notice.kind === "muted" ? <MicOff className="size-3" aria-hidden /> : <Captions className="size-3" aria-hidden />}
           {notice.text}
         </span>
       )}
-      {speakers.length > 0 && (
-        <div
-          className={cn(
-            "flex w-[min(760px,100%)] flex-col gap-1.5 transition-opacity duration-700 motion-reduce:transition-none",
-            !anyVisible && "opacity-0",
-          )}
-        >
-          {speakers.map((s) => {
-            const name = s.userId === me?.id ? "You" : (memberById[s.userId]?.full_name ?? "Someone");
-            return (
-              <div
-                key={s.userId}
-                className={cn(
-                  "flex items-start gap-2.5 rounded-2xl bg-black/70 px-3.5 py-2 text-white shadow-[0_18px_50px_-18px_rgb(0_0_0/0.9)] ring-1 ring-white/10 backdrop-blur-xl transition-opacity duration-700 motion-reduce:transition-none",
-                  s.visible ? "opacity-100" : "opacity-0",
-                )}
-              >
-                <UserAvatar
-                  id={s.userId}
-                  name={memberById[s.userId]?.full_name ?? name}
-                  size="sm"
-                  className="mt-0.5 shrink-0"
-                  ringClassName="border-transparent"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-bold tracking-wide text-white/55 uppercase">{name}</p>
-                  {s.lines.map((l, i) => (
-                    <p
-                      key={i}
-                      className={cn(
-                        "text-[15px] leading-snug font-medium [overflow-wrap:anywhere] sm:text-base",
-                        l.final ? "text-white" : "text-white/75",
-                        i < s.lines.length - 1 && "text-white/60",
-                      )}
-                    >
-                      {l.text}
-                      {!l.final && i === s.lines.length - 1 && (
-                        <span
-                          aria-hidden
-                          className="ml-1 inline-block h-[1em] w-[2px] translate-y-[2px] animate-pulse rounded-full bg-violet-300/80 motion-reduce:animate-none"
-                        />
-                      )}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      {shown.length === 0 && (
+        <p className="flex items-center gap-2 self-center pb-5 text-sm text-white/45">
+          <Captions className="size-4" aria-hidden />
+          Captions will appear here when someone speaks.
+        </p>
       )}
-    </div>
+      {shown.map((s) => {
+        const name = s.userId === me?.id ? "You" : (memberById[s.userId]?.full_name ?? "Someone");
+        const last = s.lines[s.lines.length - 1];
+        const text = s.lines.map((l) => l.text).join(" ");
+        return (
+          <div key={s.userId} className="flex min-w-0 items-start gap-3 animate-in fade-in-0 duration-200">
+            <UserAvatar
+              id={s.userId}
+              name={memberById[s.userId]?.full_name ?? name}
+              size="sm"
+              className="mt-[3px] shrink-0"
+              ringClassName="border-transparent"
+            />
+            {/* Two lines tall, pinned to the bottom: long speech scrolls off the top, newest words stay. */}
+            <span className="mt-[3px] w-[7.5rem] shrink-0 truncate text-[15px] font-semibold text-white/60" title={name}>
+              {name}
+            </span>
+            <div className="flex max-h-[2.8em] min-w-0 flex-1 flex-col justify-end overflow-hidden text-[17px] leading-[1.4] sm:text-lg">
+              <p className={cn("text-white [overflow-wrap:anywhere]", !last?.final && "text-white/90")}>{text}</p>
+            </div>
+          </div>
+        );
+      })}
+    </section>
   );
 }
