@@ -2,6 +2,7 @@ import { Fragment, type ReactNode } from "react";
 
 import { CodeBlock, resolveLanguage } from "@/components/messaging/code-block";
 import type { Member } from "@/lib/api";
+import { replaceShortcodes } from "@/lib/emoji";
 
 /**
  * Lightweight, safe message formatting (builds React nodes; never injects raw message HTML).
@@ -114,7 +115,7 @@ function inline(text: string, ctx: Ctx, keyPrefix: string): ReactNode[] {
   for (const match of text.matchAll(INLINE_RE)) {
     const [token] = match;
     const start = match.index ?? 0;
-    if (start > last) nodes.push(...marked(text.slice(last, start), ctx, `${keyPrefix}-t${i}`));
+    if (start > last) nodes.push(...marked(replaceShortcodes(text.slice(last, start)), ctx, `${keyPrefix}-t${i}`));
     const key = `${keyPrefix}-${i++}`;
     if (match[9]) {
       // The /shrug kaomoji: its underscores are not italics.
@@ -165,7 +166,7 @@ function inline(text: string, ctx: Ctx, keyPrefix: string): ReactNode[] {
     }
     last = start + token.length;
   }
-  if (last < text.length) nodes.push(...marked(text.slice(last), ctx, `${keyPrefix}-end`));
+  if (last < text.length) nodes.push(...marked(replaceShortcodes(text.slice(last)), ctx, `${keyPrefix}-end`));
   return nodes;
 }
 
