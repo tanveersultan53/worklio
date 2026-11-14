@@ -1,5 +1,7 @@
 # Worklio Desktop
 
+![The Worklio desktop app on macOS](../docs/screenshots/desktop-app.png)
+
 The Worklio app for macOS, Windows and Linux. It's a small [Electron](https://www.electronjs.org/)
 shell around your own Worklio server: everything you see comes from the server, and the shell
 adds what a browser tab can't.

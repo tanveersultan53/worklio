@@ -10,6 +10,7 @@ Every screen in Worklio, captured at 1920 × 1080 from a production build using 
 - [Calls and huddles](#calls-and-huddles)
 - [Worklio AI](#worklio-ai)
 - [Admin](#admin)
+- [Desktop app](#desktop-app)
 
 ## Getting started
 
@@ -302,3 +303,11 @@ Add Worklio AI to channels.
 Who changed what, and when.
 
 [![Audit log](screenshots/settings-audit-log.png)](screenshots/settings-audit-log.png)
+
+## Desktop app
+
+### Worklio on macOS
+
+The desktop app (`desktop/`) runs your Worklio server in its own window, with an unread badge on the dock, notifications while you're in another app, and a screen-share picker. It's also available for Windows and Linux.
+
+[![The Worklio desktop app on macOS](screenshots/desktop-app.png)](screenshots/desktop-app.png)
