@@ -1,18 +1,21 @@
 # Contributing to Worklio
 
 Thanks for helping. This guide covers setup, the checks we run, and what a good pull request
-looks like. By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+looks like. By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md). Roles
+(contributor, triager, maintainer) and how decisions are made are described in
+[GOVERNANCE.md](GOVERNANCE.md).
 
 ## Ways to help
 
-- Fix a bug or pick an issue labelled `good first issue` or `help wanted`.
+- Fix a bug or pick an issue labelled `good first issue` or `help wanted`. The pinned
+  [Roadmap issue](https://github.com/tanveersultan53/worklio/issues/24) lists what's ready.
 - Work on something from [docs/ROADMAP.md](docs/ROADMAP.md). Open an issue first so we can agree
   on the approach before you write a lot of code.
 - Improve docs, tests or accessibility.
 - Report bugs with clear steps to reproduce.
 
-To pick an issue, comment on it to say you are working on it. If nobody has replied after a few
-days, go ahead. For larger changes (new features, schema changes, new dependencies), open an issue
+To pick an issue, comment on it to ask for it and a maintainer will assign it to you. Please take
+one issue at a time. If an assigned issue has no activity for two weeks, it may be reassigned. For larger changes (new features, schema changes, new dependencies), open an issue
 or draft PR early.
 
 Security problems are the exception: never open a public issue. Follow [SECURITY.md](SECURITY.md).
@@ -52,6 +55,25 @@ docs: explain LiveKit production keys
 Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `perf`, `chore`, `ci`. The scope is
 optional. Keep the subject under about 72 characters and explain the "why" in the body when it
 is not obvious.
+
+## How changes get merged
+
+You don't need write access. The usual flow:
+
+1. **Fork** the repository and create a branch from `main` (names above).
+2. Make your change, run the [checks](#checks), and push to your fork.
+3. **Open a pull request** against `main`. Fill in the template and link the issue with
+   `Closes #123`. Open it as a draft if you want early feedback.
+4. **CI runs** on every push. Both checks must pass: *Backend (ruff + pytest)* and
+   *Frontend (tsc + lint + build)*. First-time contributors' CI runs start after a maintainer
+   approves them.
+5. **Review:** a code owner reviews the PR. Pushing new commits after an approval dismisses it,
+   so the final version is always the reviewed one. Resolve every review conversation.
+6. **Merge:** a maintainer squash-merges the PR, so the PR title becomes the commit on `main`.
+   Use a [Conventional Commits](https://www.conventionalcommits.org/) style title.
+
+`main` is protected by a ruleset: nobody, maintainers included, can push to it directly, force
+push or delete it. See [GOVERNANCE.md](GOVERNANCE.md#how-changes-reach-main) for the full rules.
 
 A DCO sign-off is not required. By submitting a contribution you agree that it is licensed under
 the project's [MIT License](LICENSE).

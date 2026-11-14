@@ -172,6 +172,7 @@ docs/               architecture, configuration, deployment, roadmap, lessons le
 | [frontend/README.md](frontend/README.md) | Working on the web app |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Community standards |
+| [GOVERNANCE.md](GOVERNANCE.md) | Roles, how to become a maintainer, how changes reach `main` |
 | [SECURITY.md](SECURITY.md) | Reporting vulnerabilities, security model, production checklist |
 | [CHANGELOG.md](CHANGELOG.md) | Release notes |
 
