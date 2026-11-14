@@ -38,3 +38,14 @@ celery_app.conf.beat_schedule.update(
         },
     }
 )
+
+# Calendar: "starts soon" reminders and "starting now" rings for scheduled meetings, every 30 s.
+celery_app.conf.beat_schedule.update(
+    {
+        "deliver-meeting-alerts": {
+            "task": "app.workers.tasks.deliver_meeting_alerts",
+            "schedule": 30.0,
+            "options": {"expires": 25},
+        },
+    }
+)

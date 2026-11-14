@@ -73,6 +73,8 @@ ActivityType = Literal[
     "reminder",
     "huddle_started",
     "card_mention",
+    "meeting_invite",
+    "meeting_reminder",
 ]
 ActivityFilter = Literal["all", "mentions", "reactions", "threads", "invites"]
 
@@ -88,7 +90,7 @@ class ActivityItemOut(BaseModel):
     emoji: str | None = None
     # Extra context: reminder text for "reminder" items, call id for "call_missed",
     # {call_id, kind} for "huddle_started", {card_id, card_title, comment_id, excerpt} for
-    # "card_mention".
+    # "card_mention", {meeting_id, title, starts_at} for "meeting_invite" / "meeting_reminder".
     meta: dict | None = None
 
 

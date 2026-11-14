@@ -9,6 +9,11 @@ versions may include breaking changes.
 ## [Unreleased]
 
 ### Added
+- Calendar: schedule a huddle in any channel or DM (huddle menu → "Schedule a huddle…", or the
+  new Calendar page). The meeting posts a live card (RSVP Yes / Maybe / No, Join, edit, cancel),
+  shows on everyone's week view and Upcoming list, sends an invite and a "starts in 10 minutes"
+  reminder to Activity, and rings attendees when it starts. Export to Google Calendar, Outlook
+  or Apple Calendar with an `.ics` file. New `APP_PUBLIC_URL` setting for links in invites.
 - README rewritten around why Worklio exists (cost, data ownership, no lock-in), with Full HD screenshots of every product area, plus translations in Simplified Chinese, Japanese, Korean, Spanish, French, German, Brazilian Portuguese, Arabic and Urdu.
 - `docs/SCREENSHOTS.md`: all 46 screens in lossless 1920×1080 PNG with descriptions.
 - MIT license, contributing guide, code of conduct, security policy, issue and pull request

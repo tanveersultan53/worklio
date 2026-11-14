@@ -4,6 +4,8 @@ import {
   AlarmClock,
   AtSign,
   Bell,
+  CalendarClock,
+  CalendarDays,
   CheckCheck,
   Hash,
   Headphones,
@@ -66,6 +68,8 @@ const TYPE_META: Record<ActivityType, { icon: LucideIcon; tint: string }> = {
   reminder: { icon: AlarmClock, tint: "bg-orange-500" },
   huddle_started: { icon: Headphones, tint: "bg-teal-600" },
   card_mention: { icon: KanbanSquare, tint: "bg-indigo-600" },
+  meeting_invite: { icon: CalendarDays, tint: "bg-pink-600" },
+  meeting_reminder: { icon: CalendarClock, tint: "bg-pink-600" },
 };
 
 const EMPTY_COPY: Record<ActivityFilter, string> = {
@@ -288,6 +292,24 @@ function ActivityRow({
           <>
             {who} mentioned you on <span className="font-bold text-foreground">{title}</span>
             {where && <> in {where}</>}
+          </>
+        );
+      }
+      case "meeting_invite":
+      case "meeting_reminder": {
+        const title = typeof a.meta?.title === "string" && a.meta.title ? a.meta.title : "a meeting";
+        const at = typeof a.meta?.starts_at === "string" ? new Date(a.meta.starts_at) : null;
+        const when = at
+          ? `${at.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}, ${at.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`
+          : "";
+        return a.type === "meeting_invite" ? (
+          <>
+            {who} invited you to <span className="font-bold text-foreground">{title}</span>
+            {when && <> · {when}</>}
+          </>
+        ) : (
+          <>
+            <span className="font-bold text-foreground">{title}</span> starts in 10 minutes{where && <> in {where}</>}
           </>
         );
       }

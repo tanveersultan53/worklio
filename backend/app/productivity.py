@@ -591,7 +591,14 @@ def activity_union(
         )
 
     stored_types = {
-        "all": ("channel_invite", "reminder", HUDDLE_STARTED, CARD_MENTION),
+        "all": (
+            "channel_invite",
+            "reminder",
+            HUDDLE_STARTED,
+            CARD_MENTION,
+            MEETING_INVITE,
+            MEETING_REMINDER,
+        ),
         "mentions": (CARD_MENTION,),
         "invites": ("channel_invite",),
     }
@@ -783,6 +790,8 @@ async def mark_activity_read(
 
 HUDDLE_STARTED = "huddle_started"
 CARD_MENTION = "card_mention"
+MEETING_INVITE = "meeting_invite"
+MEETING_REMINDER = "meeting_reminder"
 MENTION_LIKE = {
     "mention",
     "thread_reply",
@@ -790,6 +799,8 @@ MENTION_LIKE = {
     "call_missed",
     "reminder",
     CARD_MENTION,
+    MEETING_INVITE,
+    MEETING_REMINDER,
 }
 
 

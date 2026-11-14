@@ -64,7 +64,10 @@ export type ActivityType =
   /** Someone started a huddle in a channel you're in (meta: {call_id, kind}). */
   | "huddle_started"
   /** Someone @mentioned you in a Lists card comment (meta: {card_id, card_title, comment_id, excerpt}). */
-  | "card_mention";
+  | "card_mention"
+  /** Calendar (meta: {meeting_id, title, starts_at}): invited to a meeting / it starts in 10 minutes. */
+  | "meeting_invite"
+  | "meeting_reminder";
 
 export type ActivityItem = {
   id: string;

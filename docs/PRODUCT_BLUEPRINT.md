@@ -66,7 +66,7 @@ Worklio is a team communication platform: messaging, calls and collaboration, wi
 | Camera effects: background blur, virtual backgrounds, pre-join camera check | ✅ (blur live-tested) |
 | Web push for calls/huddles when the browser is closed | ⏳ [#18](https://github.com/tanveersultan53/worklio/issues/18) |
 | Huddle recording (LiveKit egress → Files) | ⏳ [#20](https://github.com/tanveersultan53/worklio/issues/20) |
-| Scheduled meetings & calendar (ICS invite) | ⏳ [#31](https://github.com/tanveersultan53/worklio/issues/31) |
+| Scheduled meetings & calendar (ICS invite) | ✅ [#31](https://github.com/tanveersultan53/worklio/issues/31) |
 
 ## 4. Collaboration surfaces
 | Feature | Status |

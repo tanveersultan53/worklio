@@ -1,10 +1,11 @@
 "use client";
 
-import { ChevronDown, Headphones, LoaderCircle, Phone, UserPlus, Video } from "lucide-react";
+import { CalendarPlus, ChevronDown, Headphones, LoaderCircle, Phone, UserPlus, Video } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { SpeakingBars } from "@/components/huddle/huddle-button";
 import { useHuddleRoom, useHuddles } from "@/components/huddle/huddle-provider";
+import { ScheduleMeetingDialog } from "@/components/meetings/schedule-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -43,6 +44,7 @@ export function CallButtons({ channelId, isDM, className }: { channelId: string;
   const { incoming, accept } = useCalls();
   const { channels, me } = useWorkspace();
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const channel = channels.find((c) => c.id === channelId);
   const selfDM = isSelfDM(channel, me?.id);
@@ -56,7 +58,10 @@ export function CallButtons({ channelId, isDM, className }: { channelId: string;
   if (selfDM && !inThis) return null;
 
   const inviteDialog = (
-    <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} channelId={channelId} inCall={inThis} />
+    <>
+      <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} channelId={channelId} inCall={inThis} />
+      <ScheduleMeetingDialog open={scheduleOpen} onOpenChange={setScheduleOpen} channelId={channelId} />
+    </>
   );
 
   if (inThis) {
@@ -126,6 +131,10 @@ export function CallButtons({ channelId, isDM, className }: { channelId: string;
         <IconAction label="Start a video call" disabled={archived} onClick={() => void startCall(channelId, "video")}>
           <Video />
         </IconAction>
+        <IconAction label="Schedule a call" disabled={archived} onClick={() => setScheduleOpen(true)}>
+          <CalendarPlus />
+        </IconAction>
+        {inviteDialog}
       </div>
     );
   }
@@ -168,6 +177,10 @@ export function CallButtons({ channelId, isDM, className }: { channelId: string;
             <DropdownMenuItem onClick={() => setInviteOpen(true)}>
               <UserPlus />
               Invite people…
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setScheduleOpen(true)}>
+              <CalendarPlus />
+              Schedule a huddle…
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

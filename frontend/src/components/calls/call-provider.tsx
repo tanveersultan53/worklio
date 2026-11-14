@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import { useHuddles } from "@/components/huddle/huddle-provider";
+import { MeetingStartingAlert } from "@/components/meetings/meeting-alert";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
 import { api } from "@/lib/api";
 
@@ -278,6 +279,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       <OutgoingCall />
       <IncomingCall />
       <HuddleBanner soundsMuted={soundsMuted} />
+      <MeetingStartingAlert soundsMuted={soundsMuted} />
     </Ctx.Provider>
   );
 }

@@ -70,7 +70,7 @@ Channels, DMs and threads, with reactions, polls, pins, bookmarks, scheduled mes
 
 ### Meet: calls that ring, huddles you drop into
 
-Ring a teammate or start a huddle in a channel. Share your screen and draw on it, react, raise a hand, take notes that land in the thread, and bring the whiteboard or board onto the stage. Calls run on LiveKit inside your own deployment.
+Ring a teammate, start a huddle in a channel, or schedule one for later: it lands on everyone's calendar, reminds them 10 minutes before and rings when it starts. Share your screen and draw on it, react, raise a hand, take notes that land in the thread, and bring the whiteboard or board onto the stage. Calls run on LiveKit inside your own deployment.
 
 | | |
 |---|---|
@@ -239,7 +239,7 @@ docs/               architecture, configuration, deployment, roadmap, lessons le
 - The message list is not virtualized (very long scroll-backs keep every loaded message in the page).
 - Threads load up to 2,000 replies; search pages up to 1,000 results.
 - Member and channel lists load in full (fine for hundreds of people, not tens of thousands).
-- No web push, email invitations, PWA, huddle recording or calendar yet.
+- No web push, email invitations, PWA or huddle recording yet. Scheduled meetings don't repeat yet.
 - No Playwright end-to-end suite yet.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for what's planned.

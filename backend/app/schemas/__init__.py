@@ -102,6 +102,7 @@ SidebarItem = Literal[
     "later",
     "drafts",
     "huddles",
+    "calendar",
     "files",
     "canvases",
     "directory",

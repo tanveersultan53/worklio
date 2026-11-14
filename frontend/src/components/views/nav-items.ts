@@ -2,6 +2,7 @@ import {
   AtSign,
   Bookmark,
   BookUser,
+  CalendarDays,
   Files,
   FileText,
   Headphones,
@@ -18,6 +19,7 @@ export type NavItemId =
   | "later"
   | "drafts"
   | "huddles"
+  | "calendar"
   | "files"
   | "canvases"
   | "directory"
@@ -75,6 +77,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     description: "Live huddles and call history",
     icon: Headphones,
     href: (ws) => `/w/${ws}/huddles`,
+  },
+  {
+    id: "calendar",
+    label: "Calendar",
+    description: "Scheduled huddles you're organizing or invited to",
+    icon: CalendarDays,
+    href: (ws) => `/w/${ws}/calendar`,
   },
   {
     id: "files",
