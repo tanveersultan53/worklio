@@ -69,7 +69,7 @@ jobs:
             -v "$PWD/infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro" \
             chrislusf/seaweedfs:latest server -s3 -s3.config=/etc/seaweedfs/s3.json -dir=/data
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
