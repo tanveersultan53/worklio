@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     max_avatar_bytes: int = 5 * 1024 * 1024
     # Public base URL of this API, used to build absolute links such as avatar URLs.
     api_public_url: str = "http://localhost:8000"
+    # Public URL of the web app, for links in calendar invites. Empty: the first CORS origin.
+    app_public_url: str = ""
 
     # Canvas documents (TipTap JSON) are capped at this many bytes of serialized content.
     max_canvas_bytes: int = 1024 * 1024

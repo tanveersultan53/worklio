@@ -24,6 +24,7 @@ from app.api.routes import (
     channels,
     health,
     huddle,
+    meetings,
     messages,
     messaging_extras,
     productivity_browse,
@@ -199,6 +200,7 @@ app.include_router(canvas.router)
 app.include_router(whiteboard.router)
 app.include_router(huddle.router)
 app.include_router(calls.router)
+app.include_router(meetings.router)
 app.include_router(productivity_inbox.router)
 app.include_router(productivity_later.router)
 app.include_router(productivity_browse.router)

@@ -18,7 +18,7 @@ reconnect gap-fill, paged threads and search)
 
 **Meetings**
 - Huddle recording (LiveKit egress → Files).
-- Scheduled meetings and calendar (ICS invites).
+- Recurring meetings, a subscribable calendar feed (webcal) and two-way Google / Outlook sync.
 
 **Quality**
 - Playwright end-to-end suite covering two-account flows.

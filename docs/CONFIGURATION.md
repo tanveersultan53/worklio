@@ -21,6 +21,7 @@ on your host. `.env.example` overrides them with Docker service names (`postgres
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `30` | Lifetime of refresh tokens. Each refresh rotates the token and extends the session. |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated list of allowed browser origins. Matching is exact (scheme, host and port). |
 | `API_PUBLIC_URL` | `http://localhost:8000` | Public base URL of the API, used for absolute links such as avatar URLs. |
+| `APP_PUBLIC_URL` | first `CORS_ORIGINS` entry | Public URL of the web app, used for "Join in Worklio" links in calendar invites (`.ics`). |
 
 ## Database, Redis and Celery
 

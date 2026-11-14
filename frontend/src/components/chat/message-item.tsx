@@ -22,6 +22,7 @@ import { AgentNotice, isAgentNotice, isHiddenEphemeral } from "@/components/ai/a
 import { MessageTranslation } from "@/components/ai/message-translation";
 import { useAppearance } from "@/components/appearance-provider";
 import { CallSystemMessage, isCallSystemMessage } from "@/components/calls";
+import { MeetingSystemMessage } from "@/components/meetings/meeting-card";
 import { DateTimeDialog } from "@/components/messaging/datetime-dialog";
 import { ForwardDialog } from "@/components/messaging/forward-dialog";
 import { MessageActionItems, useMessageActions } from "@/components/messaging/message-actions";
@@ -110,6 +111,7 @@ function MessageRow({
   // Server-authored messages (call cards, call notes): never editable or deletable, never "mention" anyone.
   const system = m.kind === "system";
   const callCard = system && isCallSystemMessage(m);
+  const meetingCard = system && m.meta?.type === "meeting";
   const aiCallSummary = system && isCallAISummaryMeta(m.meta);
   const agentNotice = isAgentNotice(m);
   const mine = m.author_id === me?.id;
@@ -248,6 +250,15 @@ function MessageRow({
               </div>
             )}
             <CallSystemMessage message={m} />
+          </>
+        ) : meetingCard ? (
+          <>
+            {dense && !compact && (
+              <div className="text-msg">
+                <DenseName userId={m.author_id} name={author} isBot={isBot} />
+              </div>
+            )}
+            <MeetingSystemMessage message={m} />
           </>
         ) : aiCallSummary ? (
           <>

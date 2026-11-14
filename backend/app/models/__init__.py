@@ -133,3 +133,8 @@ __all__ += ["AIAgentInstall", "WorkspaceAISettings"]
 from app.models.admin import AuditEvent, DeactivatedMember, InviteLink
 
 __all__ += ["AuditEvent", "DeactivatedMember", "InviteLink"]
+
+# Calendar: scheduled meetings.
+from app.models.meeting import RSVP, Meeting, MeetingAttendee, MeetingStatus
+
+__all__ += ["RSVP", "Meeting", "MeetingAttendee", "MeetingStatus"]

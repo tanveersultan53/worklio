@@ -12,7 +12,7 @@ export type Density = "comfortable" | "compact";
 export type SwitcherVisibility = "auto" | "always" | "never";
 export type NotifyLevel = "all" | "mentions" | "nothing";
 /** Sidebar nav items a user can hide (ids match NAV_ITEMS in components/views/nav-items). */
-export const SIDEBAR_NAV_IDS = ["threads", "activity", "later", "drafts", "huddles", "files", "canvases", "directory", "unreads"] as const;
+export const SIDEBAR_NAV_IDS = ["threads", "activity", "later", "drafts", "huddles", "calendar", "files", "canvases", "directory", "unreads"] as const;
 
 /** Notifications are only delivered inside this weekly window (in `tz`). */
 export type NotifySchedule = {

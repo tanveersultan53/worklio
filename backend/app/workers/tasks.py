@@ -153,3 +153,22 @@ def deliver_reminders() -> int:
     if count:
         log.info("Delivered %d reminders", count)
     return count
+
+
+# --- Calendar -------------------------------------------------------------------------------
+
+
+@celery_app.task
+def deliver_meeting_alerts() -> int:
+    """Beat (every 30 s): meeting reminders (10 min before) and "starting now" rings."""
+    from app.core.db import SessionLocal
+    from app.meetings import deliver_due
+
+    async def go() -> int:
+        async with SessionLocal() as db:
+            return await deliver_due(db)
+
+    count = asyncio.run(_with_api_stack(go))
+    if count:
+        log.info("Sent %d meeting alerts", count)
+    return count

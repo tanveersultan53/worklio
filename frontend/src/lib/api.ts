@@ -316,6 +316,8 @@ export type RealtimeEvent =
   | { type: "huddle.ended"; call_id: string; channel_id: string }
   /** Calls: ringing / ring_stopped / invite_updated are per-user; updated / notes_updated go to the channel. */
   | import("@/components/calls/types").CallRealtimeEvent
+  /** Calendar: a meeting I'm in changed / is starting now (per-user). */
+  | import("@/lib/meetings").MeetingRealtimeEvent
   /** Live whiteboard edits / cursors (re-broadcast of client frames; ignore your own `client_id`). */
   | import("@/components/whiteboard/types").WhiteboardRealtimeEvent
   /** A whiteboard save landed: its new version (lets open boards advance their base_version). */
