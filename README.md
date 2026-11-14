@@ -247,6 +247,16 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for what's planned.
 Before running Worklio anywhere other than your laptop, read the production checklist in
 [SECURITY.md](SECURITY.md).
 
+## Support Worklio
+
+Worklio is free and always will be. If it saves your team money or keeps your data where it belongs, please consider supporting its development:
+
+- **[Sponsor on GitHub](https://github.com/sponsors/tanveersultan53)**, one-off or monthly.
+- **Star the repository** and share it with teams who pay too much for chat.
+- **Contribute** code, docs, translations or bug reports.
+
+Funding pays for maintenance, security fixes, hosting for the demo and docs, and new features from the [roadmap](https://github.com/tanveersultan53/worklio/issues/24). Companies that rely on Worklio can sponsor to prioritise the work they need.
+
 ## Contributing
 
 Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks and the
