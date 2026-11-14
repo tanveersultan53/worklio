@@ -5,76 +5,149 @@
 <h1 align="center">Worklio</h1>
 
 <p align="center">
-  Open-source team chat with channels, calls, shared docs and boards, and permission-aware AI.
+  <strong>Open-source team chat you host yourself.</strong><br>
+  Channels, threads, calls and huddles, shared docs, boards and AI, on your own servers.
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/walkthrough.gif" alt="Worklio walkthrough: replying in a thread, switching to a launch board, and dark mode" width="960">
+  <a href="https://github.com/tanveersultan53/worklio/actions/workflows/ci.yml"><img src="https://github.com/tanveersultan53/worklio/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/tanveersultan53/worklio/releases"><img src="https://img.shields.io/github/v/release/tanveersultan53/worklio" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-007a5a" alt="MIT license"></a>
+  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-2fb3e8" alt="Pull requests welcome"></a>
 </p>
-
-Worklio is a self-hostable workspace for teams. It has channels and DMs, threads, ringing calls
-and huddles, a live whiteboard, collaborative docs, boards, voice and video clips, and an AI
-assistant that only sees what the asking user is allowed to see. It is MIT licensed. You are free
-to use it, change it and build on it.
-
-> **Status:** early (0.1.0). It works end to end in local development and has a large backend test
-> suite, but it has not been hardened by production use yet. See [Known limitations](#known-limitations).
-
-## See it in action
-
-**Huddles:** three people on camera sending emoji reactions, switching the stage to the whiteboard and the launch board, then raising a hand.
 
 <p align="center">
-  <img src="docs/screenshots/huddle.gif" alt="A Worklio huddle with three people sending emoji reactions, switching the stage to the whiteboard and the board, then raising a hand" width="900">
+  <b>English</b> ·
+  <a href="README.zh-CN.md">简体中文</a> ·
+  <a href="README.ja.md">日本語</a> ·
+  <a href="README.ko.md">한국어</a> ·
+  <a href="README.es.md">Español</a> ·
+  <a href="README.fr.md">Français</a> ·
+  <a href="README.de.md">Deutsch</a> ·
+  <a href="README.pt-BR.md">Português</a> ·
+  <a href="README.ar.md">العربية</a> ·
+  <a href="README.ur.md">اردو</a>
 </p>
 
-The demos use a demo workspace with fictional people. Recreate it with
-`python3 scripts/seed_demo.py /tmp/worklio-demo.json`.
+<p align="center">
+  <img src="docs/screenshots/walkthrough.gif" alt="Worklio walkthrough: replying in a thread, opening the launch board and switching to dark mode" width="960">
+</p>
 
-## Features
+## Why we built Worklio
 
-**Messaging**
-- Public and private channels, DMs and group DMs, threads, reactions, edit and delete, edit history.
-- Rich text, @mentions, `@here` / `@channel` / `@everyone`, user groups, emoji picker.
-- File uploads, voice messages, video clips and screen recordings.
-- Pinned messages, channel bookmarks, forwarding, polls, scheduled send, slash commands.
-- Link previews fetched server side with SSRF protection.
-- Typing indicators, presence, unread counts, read receipts, drafts, jump to message, search.
+Team chat has become the place where companies do their work. Yet most teams rent it:
 
-**Navigation and productivity**
-- Workspace rail, ⌘K switcher, multiple workspaces.
-- Activity, Threads, Unreads, Drafts & sent, Later (saved items and to-dos), reminders.
-- Files browser, people and channel directories, huddle history.
-- Custom sidebar sections, per-channel notification settings and mute, Do Not Disturb, status.
+- **The bill grows with every hire.** Hosted chat is usually priced per person, per month. Add ten people and the bill goes up whether or not anything else changed.
+- **Your conversations live on someone else's servers.** Decisions, customer details, plans and files sit in a vendor's database, under their policies and in their region.
+- **You're locked in.** History limits, export restrictions and features held back for higher plans make it hard to leave.
+- **AI comes with strings.** AI features often cost extra and send your messages to services you didn't choose.
 
-**Calls and huddles** (LiveKit)
-- Ringing audio/video calls with incoming, missed, declined and cancelled states.
-- Channel huddles with join/leave sounds and a live banner.
-- Screen share with annotation, in-call notes and chat, background blur and virtual backgrounds.
-- Live captions (browser speech recognition) and AI call summaries.
+Worklio is the alternative: a complete, modern team chat that you **run yourself**. It's MIT licensed, so you can use it, change it and build on it for free, forever.
 
-**Collaboration**
-- Whiteboard (Excalidraw) with live cursors, usable inside calls.
-- Canvas docs (TipTap) with real-time co-editing over Yjs, comments and templates.
-- Boards and lists: Kanban and table views, custom fields, subtasks, card comments.
-- Screen recording with a camera bubble, drawing and trimming.
+## What changes when you host it
 
-**Worklio AI** (Claude, Gemini or DeepSeek)
-- Ask Worklio (Q&A with cited sources), Catch me up, channel and thread summaries.
-- Composer assistant (rewrite, fix grammar, translate), message translation, thread → tasks.
-- An `@worklio` agent you can add to channels.
-- Retrieval goes through Worklio's permission-checked search, so the AI never sees messages the
-  asking user cannot read.
+| | Typical hosted team chat | Worklio |
+|---|---|---|
+| **Cost** | A fee per person, every month | Free software; you pay only for your server |
+| **Where your data lives** | The vendor's cloud | Your servers, your region, your backups |
+| **Message history** | Often limited on lower plans | Unlimited; it's your database |
+| **Source code** | Closed | Open (MIT): read, audit and change everything |
+| **AI** | Extra cost, vendor's choice of model | Bring your own key: Claude, Gemini or DeepSeek |
+| **Leaving** | Exports and migrations | Nothing to leave; you already own it |
 
-**Admin and trust**
-- Roles (owner, admin, member, guest), workspace policies, member management, invite links.
-- Audit log, workspace settings and icon, encrypted per-workspace AI keys.
+**An example.** At an example price of $10 per person per month, a 50-person team pays **$6,000 a year**, and **$12,000** when it grows to 100. Worklio runs on a single server; at an example cost of $40 a month, that's **$480 a year**, whether you have 20 people or 200. Your numbers will differ, but the shape won't: hosted chat scales with headcount, Worklio scales with your hardware.
 
-**Appearance**
-- 8 themes with dark variants, light/dark/system mode, custom accent colour, 6 fonts,
-  4 text sizes, compact density, reduced motion, resizable sidebar and focus mode.
+## What you get
 
-The full feature list and its status live in [docs/PRODUCT_BLUEPRINT.md](docs/PRODUCT_BLUEPRINT.md).
+### Talk: conversations that stay organised
+
+Channels, DMs and threads, with reactions, polls, pins, bookmarks, scheduled messages, slash commands and search filters. Jump to any message, however old.
+
+| | |
+|---|---|
+| ![A channel with reactions, a thread, a poll and a pinned message](docs/screenshots/channel.png) | ![A thread open beside the channel](docs/screenshots/thread.png) |
+| ![Message actions: save, pin, remind, forward and copy link](docs/screenshots/message-actions.png) | ![Search with person, channel, type and date filters](docs/screenshots/search.png) |
+
+### Meet: calls that ring, huddles you drop into
+
+Ring a teammate or start a huddle in a channel. Share your screen and draw on it, react, raise a hand, take notes that land in the thread, and bring the whiteboard or board onto the stage. Calls run on LiveKit inside your own deployment.
+
+| | |
+|---|---|
+| ![A huddle with three people and emoji reactions](docs/screenshots/huddle.png) | ![An incoming video call](docs/screenshots/incoming-call.png) |
+| ![The whiteboard on stage during a call](docs/screenshots/huddle-whiteboard.png) | ![The board on stage during a call](docs/screenshots/huddle-board.png) |
+
+<p align="center">
+  <img src="docs/screenshots/huddle.gif" alt="A huddle: emoji reactions, switching the stage to the whiteboard and the board, then raising a hand" width="900">
+</p>
+
+### Make: docs, boards and whiteboards beside the chat
+
+Every channel has a canvas the team writes together live, a board with priorities, labels, due dates and a table view, and a shared whiteboard.
+
+| | |
+|---|---|
+| ![A canvas with a launch plan, checklist and timeline](docs/screenshots/canvas.png) | ![A board with To do, In progress and Done](docs/screenshots/board.png) |
+| ![The board as a sortable table](docs/screenshots/board-table.png) | ![A whiteboard with a launch diagram](docs/screenshots/whiteboard.png) |
+
+### Ask: AI that only sees what you can see
+
+Ask questions about your workspace with sources, catch up on busy channels, rewrite or translate messages, turn threads into tasks, and add the @worklio agent to channels. Worklio AI looks things up through the same permission checks as search, so it can never show someone a message they couldn't open. Bring your own Claude, Gemini or DeepSeek key; it's encrypted at rest.
+
+| | |
+|---|---|
+| ![Ask Worklio](docs/screenshots/ask-worklio.png) | ![AI settings: provider, key, model and features](docs/screenshots/settings-ai.png) |
+
+### Stay on top: your personal views
+
+Activity, Threads, Unreads, Later (saved messages and to-dos), Drafts & sent, Huddles, Files, Canvases and a Directory of people and channels.
+
+| | |
+|---|---|
+| ![Activity: mentions, reactions and replies](docs/screenshots/activity.png) | ![Later: saved messages and to-dos](docs/screenshots/later.png) |
+
+### Run it: admin, permissions and trust
+
+Roles (owner, admin, member, guest), permissions enforced on the server, invite links, member management and an audit log of every sensitive change.
+
+| | |
+|---|---|
+| ![Permissions](docs/screenshots/settings-permissions.png) | ![Members](docs/screenshots/settings-members.png) |
+
+**[See all 46 screens with descriptions →](docs/SCREENSHOTS.md)**
+
+## Self-host in five minutes
+
+You need Docker (with Compose), Node.js 22 and npm.
+
+```bash
+git clone https://github.com/tanveersultan53/worklio.git && cd worklio
+cp .env.example .env            # dev defaults, no edits needed
+make up                         # database, storage, API, workers, scheduler and calls
+cd frontend && npm install && npm run dev
+```
+
+Open http://localhost:3000, create an account and a workspace, then invite your team from **Workspace settings → Invitations**.
+
+To see Worklio full of realistic content, seed the demo workspace with fictional people:
+
+```bash
+python3 scripts/seed_demo.py /tmp/worklio-demo.json   # the JSON file contains the demo logins
+```
+
+### Going to production
+
+`docker-compose.prod.yml` runs the whole stack on one server with non-root images, security headers and startup checks that refuse weak secrets. Put a TLS reverse proxy in front and you're done; the step-by-step guide, with a Caddy example, is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
+
+## Your data, your rules
+
+- **Everything stays on your infrastructure:** messages and files in your Postgres and your S3-compatible storage, calls through your own LiveKit server.
+- **Tenant isolation is enforced on the server** for every request; people outside a workspace can't even tell it exists.
+- **Short-lived sessions with rotating refresh tokens**, reuse detection and rate limits on sign-in.
+- **AI keys are encrypted at rest** and never logged or shown again; AI only sees what the asking person can read.
+- **Audit log** of roles, access, settings, invitations, AI and apps.
+
+Read [SECURITY.md](SECURITY.md) for the full security model and the production checklist.
 
 ## Tech stack
 
@@ -90,26 +163,12 @@ The full feature list and its status live in [docs/PRODUCT_BLUEPRINT.md](docs/PR
 | AI | Anthropic SDK (Claude), OpenAI-compatible SDK (Gemini, DeepSeek) |
 | Web app | Next.js 16 (App Router), React 19 (React Compiler lint rules), TypeScript, Tailwind CSS v4, shadcn/ui on Base UI, TipTap v3, livekit-client |
 
-## Quick start
+## Reference
 
-You need Docker (with Compose), Node.js 22 and npm.
-
-```bash
-git clone https://github.com/tanveersultan53/worklio.git && cd worklio
-cp .env.example .env            # dev defaults, no edits needed
-make up                         # builds and starts every backend service (see table below)
-cd frontend && npm install && npm run dev
-```
-
-Open http://localhost:3000, create an account and a workspace.
-
-- `make up` runs `docker compose up -d --build`. It starts Postgres, Redis, SeaweedFS, the API,
-  the Celery worker, Celery beat and LiveKit. The API applies migrations on start.
+- `make up` runs `docker compose up -d --build`. It starts Postgres, Redis, SeaweedFS, the API, the Celery worker, Celery beat and LiveKit. The API applies migrations on start.
 - `make web` is a shortcut for `cd frontend && npm run dev`.
-- The web app talks to `http://localhost:8000` by default. To change that, copy
-  `frontend/.env.example` to `frontend/.env.local` and edit it.
-- AI is optional. Set `ANTHROPIC_API_KEY` in `.env`, or add a Claude, Gemini or DeepSeek key in
-  **Workspace settings → AI**. Without a key, AI endpoints answer `503 ai_not_configured`.
+- The web app talks to `http://localhost:8000` by default. To change that, copy `frontend/.env.example` to `frontend/.env.local` and edit it.
+- AI is optional. Set `ANTHROPIC_API_KEY` in `.env`, or add a Claude, Gemini or DeepSeek key in **Workspace settings → AI**. Without a key, AI endpoints answer `503 ai_not_configured`.
 
 ### Services and ports
 
@@ -163,7 +222,8 @@ docs/               architecture, configuration, deployment, roadmap, lessons le
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, realtime flow, design rules, WebSocket events, subsystems |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Every environment variable, with defaults |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Running Worklio in production with Docker |
-| [docs/PRODUCT_BLUEPRINT.md](docs/PRODUCT_BLUEPRINT.md) | Feature list, status and delivery waves |
+| [docs/PRODUCT_BLUEPRINT.md](docs/PRODUCT_BLUEPRINT.md) | Every feature and its verified status |
+| [docs/SCREENSHOTS.md](docs/SCREENSHOTS.md) | Every screen, in Full HD, with what it does |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | What comes next |
 | [docs/LESSONS_LEARNED.md](docs/LESSONS_LEARNED.md) | Pitfalls we hit and how we fixed them |
 | [backend/README.md](backend/README.md) | Working on the API |
