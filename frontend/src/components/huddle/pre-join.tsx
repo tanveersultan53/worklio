@@ -154,7 +154,7 @@ type CamState = { track: LocalVideoTrack | null; error: string | null; deviceId:
 type MicState = { error: string | null; deviceId: string | null };
 type DeviceLists = Record<Kind, MediaDeviceInfo[]>;
 const NO_DEVICES: DeviceLists = { audioinput: [], videoinput: [], audiooutput: [] };
-const PREVIEW_OPTS = { resolution: { width: 1280, height: 720, frameRate: 24 } };
+const PREVIEW_OPTS = { resolution: { width: 1280, height: 720, frameRate: 30 } };
 
 function PreJoinBody({ request, active }: { request: PreJoinRequest; active: boolean }) {
   const { me, channels, channelLabel } = useWorkspace();

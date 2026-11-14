@@ -92,7 +92,19 @@ const HEARTBEAT_MS = 20_000;
 const EMPTY_MAP: Record<string, HuddleInfo> = {};
 const EMPTY_CALLS: Record<string, CallOut> = {};
 const EMPTY_INVITES: CallInvite[] = [];
-const CAMERA_OPTS = { resolution: { width: 1280, height: 720, frameRate: 24 } };
+/** HD at 30 fps (24 fps looked choppy next to other call apps). */
+const CAMERA_OPTS = { resolution: { width: 1280, height: 720, frameRate: 30 } };
+/**
+ * What we send. The top layer gets more room than LiveKit's 1.7 Mbps default so faces stay sharp;
+ * dynacast still pauses layers nobody watches. Screen shares go out at 1080p, tuned for text.
+ */
+const PUBLISH_DEFAULTS = {
+  simulcast: true,
+  videoEncoding: { maxBitrate: 2_500_000, maxFramerate: 30 },
+  screenShareEncoding: { maxBitrate: 3_000_000, maxFramerate: 15 },
+  dtx: true,
+  red: true,
+};
 /** Join/leave cues stay quiet this long after (re)connecting, so the initial roster never chimes. */
 const ROSTER_SETTLE_MS = 1500;
 /** Beyond this many people, "X joined" toasts become noise (the sound still plays). */
@@ -387,8 +399,11 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
         });
 
         const room = new Room({
-          adaptiveStream: true,
+          // "screen": size requests by real device pixels, so Retina/HiDPI screens get HD layers
+          // instead of the half-resolution ones a CSS-pixel measure picks.
+          adaptiveStream: { pixelDensity: "screen" },
           dynacast: true,
+          publishDefaults: PUBLISH_DEFAULTS,
           audioCaptureDefaults: {
             echoCancellation: true,
             noiseSuppression: true,

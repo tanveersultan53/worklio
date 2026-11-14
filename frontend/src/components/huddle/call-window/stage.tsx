@@ -28,7 +28,7 @@ const Annotator = dynamic(() => import("@/components/annotate").then((m) => m.An
 const GAP = 10;
 const MAX_GRID = 9;
 /** Tiles may stretch between these aspect ratios (video is cropped to fill), so the grid has no letterboxing. */
-const MIN_ASPECT = 0.8;
+const MIN_ASPECT = 1.0;
 const MAX_ASPECT = 2.0;
 const IDEAL_ASPECT = 16 / 9;
 
@@ -68,7 +68,8 @@ function fitGrid(n: number, w: number, h: number) {
     const shape = Math.abs(Math.log(tw / th / IDEAL_ASPECT));
     // Empty cells in the last row cost a little, so 3 people prefer 3x1 / 2+1 sensibly.
     const empty = rows * cols - n;
-    const score = tw * th * (1 - 0.18 * shape) * (1 - 0.04 * empty);
+    // Shape counts heavily: a tall tile crops away most of a 16:9 camera and upscales the rest.
+    const score = tw * th * (1 - 0.45 * shape) * (1 - 0.04 * empty);
     if (score > best.score) best = { cols, tw, th, score };
   }
   return { cols: best.cols, tw: Math.floor(best.tw), th: Math.floor(best.th) };
