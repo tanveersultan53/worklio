@@ -125,7 +125,8 @@ jobs:
         run: npm ci
 
       - name: Type-check
-        run: npx tsc --noEmit
+        # Next.js generates route types (LayoutProps, PageProps…) that tsc needs on a fresh checkout.
+        run: npx next typegen && npx tsc --noEmit
 
       - name: Lint
         run: npm run lint
