@@ -140,6 +140,9 @@ export class HuddleRoomStore {
 export function mediaErrorMessage(err: unknown, device: "microphone" | "camera" | "screen"): string {
   const failure = MediaDeviceFailure.getFailure(err);
   const label = device === "screen" ? "Screen sharing" : device === "camera" ? "Camera" : "Microphone";
+  if (device === "screen" && failure !== MediaDeviceFailure.PermissionDenied) {
+    return "Couldn't start screen sharing. Try again, or pick a different screen or window.";
+  }
   switch (failure) {
     case MediaDeviceFailure.PermissionDenied:
       return `${label} access is blocked. Allow it in your browser's site settings and try again.`;
