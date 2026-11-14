@@ -82,7 +82,14 @@ def ensure_bucket() -> None:
     try:
         internal_client().head_bucket(Bucket=settings.s3_bucket)
     except ClientError:
-        internal_client().create_bucket(Bucket=settings.s3_bucket)
+        try:
+            internal_client().create_bucket(Bucket=settings.s3_bucket)
+        except ClientError as err:
+            # Several API workers start at once; another one may have just created it.
+            code = err.response.get("Error", {}).get("Code", "")
+            if code not in ("BucketAlreadyOwnedByYou", "BucketAlreadyExists"):
+                raise
+            internal_client().head_bucket(Bucket=settings.s3_bucket)
 
 
 def upload(key: str, fileobj: BinaryIO, content_type: str) -> None:
