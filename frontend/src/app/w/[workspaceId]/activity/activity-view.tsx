@@ -21,6 +21,7 @@ import { Fragment, useState } from "react";
 
 import { useNow } from "@/components/profile/profile-utils";
 import { UserAvatar } from "@/components/chat/user-avatar";
+import { InviteRsvp } from "@/components/meetings/invite-rsvp";
 import { ChannelTag, MessageSnippet } from "@/components/views/message-snippet";
 import { usePaged } from "@/components/views/use-paged";
 import { SELECTED_ROW, useListNav } from "@/components/views/use-list-nav";
@@ -365,6 +366,7 @@ function ActivityRow({
           </time>
           {!a.read && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-tab" aria-label="Unread" />}
         </div>
+        {a.type === "meeting_invite" && typeof a.meta?.meeting_id === "string" && <InviteRsvp meetingId={a.meta.meeting_id} />}
         {a.type === "card_mention" && typeof a.meta?.excerpt === "string" && a.meta.excerpt && (
           <div className="mt-1.5 line-clamp-3 rounded-lg border bg-background/70 p-2.5 text-sm break-words whitespace-pre-wrap">
             {formatMessage(a.meta.excerpt, { names: ws.memberById, meId: ws.me?.id })}

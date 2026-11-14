@@ -55,7 +55,71 @@ export const meetingsApi = {
     api<Meeting[]>(
       `/workspaces/${workspaceId}/meetings?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`,
     ),
+  /** When these people already have meetings (times only), for suggestions and conflicts. */
+  busy: (workspaceId: string, userIds: string[], start: Date, end: Date) => {
+    const q = new URLSearchParams({ start: start.toISOString(), end: end.toISOString() });
+    for (const id of userIds) q.append("user_ids", id);
+    return api<FreeBusy[]>(`/workspaces/${workspaceId}/meetings/busy?${q}`);
+  },
 };
+
+export type FreeBusy = { user_id: string; busy: { start: string; end: string }[] };
+
+/** Busy intervals per person, as epoch ms. */
+export type BusyMap = Map<string, [number, number][]>;
+
+export function toBusyMap(rows: FreeBusy[], ignoreMeetingSpan?: [number, number]): BusyMap {
+  const map: BusyMap = new Map();
+  for (const r of rows) {
+    map.set(
+      r.user_id,
+      r.busy
+        .map((b): [number, number] => [new Date(b.start).getTime(), new Date(b.end).getTime()])
+        // Editing a meeting: its own slot shouldn't count as a clash.
+        .filter(([s, e]) => !ignoreMeetingSpan || s !== ignoreMeetingSpan[0] || e !== ignoreMeetingSpan[1]),
+    );
+  }
+  return map;
+}
+
+/** Who (of `ids`) is busy during [start, end). */
+export function busyDuring(map: BusyMap, ids: string[], start: number, end: number): string[] {
+  return ids.filter((id) => (map.get(id) ?? []).some(([s, e]) => s < end && e > start));
+}
+
+const WORK_START_H = 9;
+const WORK_END_H = 18;
+
+/**
+ * The next few `lengthMin` slots, on the half hour inside working hours on weekdays, when nobody
+ * in `ids` has a meeting. Starts searching from `from` (at least 15 minutes from now).
+ */
+export function suggestSlots(map: BusyMap, ids: string[], lengthMin: number, from: number, now: number, count = 4): Date[] {
+  const out: Date[] = [];
+  const d = new Date(Math.max(from, now + 15 * 60_000));
+  d.setSeconds(0, 0);
+  d.setMinutes(d.getMinutes() <= 30 ? (d.getMinutes() === 0 ? 0 : 30) : 60);
+  const limit = now + 14 * 24 * 60 * 60_000;
+  while (out.length < count && d.getTime() < limit) {
+    const day = d.getDay();
+    const h = d.getHours() + d.getMinutes() / 60;
+    const endH = h + lengthMin / 60;
+    if (day === 0 || day === 6 || h < WORK_START_H) {
+      if (day === 0 || day === 6 || h >= WORK_END_H) d.setDate(d.getDate() + 1);
+      d.setHours(WORK_START_H, 0, 0, 0);
+      continue;
+    }
+    if (endH > WORK_END_H) {
+      d.setDate(d.getDate() + 1);
+      d.setHours(WORK_START_H, 0, 0, 0);
+      continue;
+    }
+    const s = d.getTime();
+    if (!busyDuring(map, ids, s, s + lengthMin * 60_000).length) out.push(new Date(s));
+    d.setTime(s + 30 * 60_000);
+  }
+  return out;
+}
 
 /** Download the meeting as an .ics file (Google Calendar, Outlook, Apple Calendar). */
 export async function downloadIcs(meeting: Pick<Meeting, "id" | "title">): Promise<void> {

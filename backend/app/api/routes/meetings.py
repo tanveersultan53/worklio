@@ -6,13 +6,14 @@ See app.meetings for the rules and realtime events.
 import re
 import uuid
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Query, Response
 
 from app import meetings
 from app.api.deps import DB, ChannelAccess, CurrentUser, WorkspaceMembership
 from app.models import RSVP
-from app.schemas_meetings import MeetingIn, MeetingOut, MeetingPatch, RSVPIn
+from app.schemas_meetings import FreeBusyOut, MeetingIn, MeetingOut, MeetingPatch, RSVPIn
 
 router = APIRouter(tags=["calendar"])
 
@@ -39,6 +40,18 @@ async def my_meetings(
     return await meetings.list_for_user(
         db, member.workspace_id, user, start, end, include_cancelled=include_cancelled
     )
+
+
+@router.get("/workspaces/{workspace_id}/meetings/busy", response_model=list[FreeBusyOut])
+async def busy_times(
+    member: WorkspaceMembership,
+    db: DB,
+    start: datetime,
+    end: datetime,
+    user_ids: Annotated[list[uuid.UUID], Query(max_length=50)],
+) -> list[FreeBusyOut]:
+    """When these people already have meetings in [start, end) (at most 14 days): times only."""
+    return await meetings.free_busy(db, member.workspace_id, user_ids, start, end)
 
 
 @router.get("/meetings/{meeting_id}", response_model=MeetingOut)
