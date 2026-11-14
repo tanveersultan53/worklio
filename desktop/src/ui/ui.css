@@ -1,0 +1,79 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --panel: #f6f4f6;
+  --text: #1d1c1d;
+  --muted: #616061;
+  --line: #dddcdd;
+  --brand: #3a1238;
+  --primary: #007a5a;
+  --primary-hover: #006c4f;
+  --danger: #c4314b;
+  --ring: rgb(0 122 90 / 0.35);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1d21;
+    --panel: #222529;
+    --text: #e8e8e8;
+    --muted: #a3a3a5;
+    --line: #3b3d42;
+    --primary: #148567;
+    --primary-hover: #1a9675;
+    --danger: #f2768a;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font: inherit; }
+.center {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 32px 24px;
+}
+.card { width: 100%; max-width: 420px; }
+.logo { width: 56px; height: 56px; border-radius: 14px; display: block; }
+h1 { font-size: 22px; line-height: 1.25; margin: 20px 0 6px; letter-spacing: -0.01em; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+label { display: block; font-weight: 600; margin: 24px 0 6px; }
+input[type="text"] {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+}
+input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--ring); }
+.hint { font-size: 12.5px; margin-top: 8px; }
+.error { color: var(--danger); font-size: 13px; margin-top: 10px; min-height: 1.2em; }
+.actions { display: flex; gap: 8px; margin-top: 20px; }
+.btn {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover { background: var(--panel); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn:disabled { opacity: 0.6; cursor: default; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+[hidden] { display: none !important; }

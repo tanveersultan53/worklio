@@ -11,6 +11,12 @@ updates:
     schedule: { interval: weekly }
     groups:
       npm: { patterns: ["*"] }
+  # Electron ships Chromium security fixes; keep the desktop app current.
+  - package-ecosystem: npm
+    directory: /desktop
+    schedule: { interval: weekly }
+    groups:
+      desktop: { patterns: ["*"] }
   - package-ecosystem: docker
     directory: /backend
     schedule: { interval: monthly }

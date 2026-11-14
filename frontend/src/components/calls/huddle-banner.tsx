@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useHuddles } from "@/components/huddle/huddle-provider";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
+import { bringToFront, isAway } from "@/lib/desktop";
 
 import { CallAvatarStack } from "./avatar-stack";
 import { playHuddleChime } from "./tones";
@@ -79,14 +80,14 @@ export function HuddleBanner({ soundsMuted }: { soundsMuted: boolean }) {
 
   const notifyDesktop = (callId: string, channelId: string, starterId: string) => {
     if (typeof Notification === "undefined" || typeof document === "undefined") return;
-    if (!document.hidden || Notification.permission !== "granted") return;
+    if (!isAway() || Notification.permission !== "granted") return;
     try {
       const n = new Notification(`🎧 ${personName(starterId)} started a huddle in ${channelName(channelId)}`, {
         body: "Click to open the channel and join.",
         tag: `huddle-${callId}`,
       });
       n.onclick = () => {
-        window.focus();
+        bringToFront();
         router.push(`/w/${workspaceId}/c/${channelId}`);
         n.close();
       };

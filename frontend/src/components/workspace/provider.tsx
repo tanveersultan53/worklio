@@ -17,6 +17,7 @@ import {
   type Workspace,
 } from "@/lib/api";
 import { notifyAIChanged } from "@/lib/admin";
+import { bringToFront, isAway } from "@/lib/desktop";
 import { decodeMentions } from "@/lib/format";
 import { groupIdsFor, refreshGroups } from "@/components/messaging/use-groups";
 import { asProductivityEvent } from "@/lib/productivity";
@@ -227,7 +228,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     try {
       const n = new Notification(title, { body, tag: key });
       n.onclick = () => {
-        window.focus();
+        bringToFront();
         if (href) router.push(href);
       };
     } catch {
@@ -244,7 +245,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     // System messages only notify for a missed call; everything else is server chatter.
     if (m.kind === "system" && !missedCall) return;
     if (m.author_id === meRef.current?.id) return;
-    if (!document.hidden && m.channel_id === activeChannel.current) return;
+    if (!isAway() && m.channel_id === activeChannel.current) return;
     const channel = channelsRef.current.find((c) => c.id === m.channel_id);
     const meId = meRef.current?.id;
     if (
@@ -317,7 +318,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     }
     const m = item.message;
     if (!m || m.author_id === meId) return;
-    if (!document.hidden && m.channel_id === activeChannel.current) return;
+    if (!isAway() && m.channel_id === activeChannel.current) return;
     if (!shouldNotify(channel.id, m, { meId, prefs: prefsRef.current, channel, groupIds: groupIdsFor(m.workspace_id, meId), important: true })) return;
     const where = channel.kind === "dm" ? "" : ` in #${channel.name}`;
     deliver(m.id, `${actor} replied to a thread${where}`, decodeMentions(m.body, membersRef.current) || "Sent an attachment", `/w/${workspaceId}/c/${channel.id}`);

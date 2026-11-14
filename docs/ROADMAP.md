@@ -27,7 +27,8 @@ reconnect gap-fill, paged threads and search)
 
 ## Later
 
-- Desktop app (Tauri) and mobile apps.
+- Desktop app: code signing, auto-update, `worklio://` links, several servers side by side.
+- Mobile apps.
 - Webhooks, bot tokens and an app framework.
 - SSO/SAML and SCIM.
 - Internationalisation.

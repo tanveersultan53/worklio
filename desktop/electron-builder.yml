@@ -1,0 +1,48 @@
+appId: io.worklio.desktop
+productName: Worklio
+copyright: Copyright © 2026 Worklio contributors
+artifactName: Worklio-${version}-${os}-${arch}.${ext}
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**/*
+  - package.json
+
+mac:
+  category: public.app-category.business
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSMicrophoneUsageDescription: Worklio uses your microphone for huddles and calls.
+    NSCameraUsageDescription: Worklio uses your camera for video huddles.
+
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+
+nsis:
+  oneClick: true
+  perMachine: false
+  shortcutName: Worklio
+
+linux:
+  category: Network;Chat;InstantMessaging
+  synopsis: Open-source team chat
+  maintainer: Worklio contributors <noreply@worklio.app>
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64, arm64]
+
+publish: null

@@ -9,6 +9,13 @@ versions may include breaking changes.
 ## [Unreleased]
 
 ### Added
+- Desktop app for macOS, Windows and Linux (`desktop/`, Electron). It asks for your server's
+  address on first launch and shows the unread count on the dock or taskbar. Notifications now
+  arrive whenever the window isn't focused, and clicking one brings the app forward. It also
+  has a screen-share picker with previews, mic and camera prompts (including on plain-http LAN
+  servers), keeps running in the background with a tray icon on Windows/Linux, remembers its
+  window position, opens external links in the browser, and offers spelling suggestions on
+  right-click. A GitHub Actions workflow builds .dmg, .exe, AppImage and .deb on `desktop-v*` tags.
 - Calendar: schedule a huddle in any channel or DM (huddle menu → "Schedule a huddle…", or the
   new Calendar page). The meeting posts a live card (RSVP Yes / Maybe / No, Join, edit, cancel),
   shows on everyone's week view and Upcoming list, sends an invite and a "starts in 10 minutes"

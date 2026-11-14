@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'" />
+    <title>Connect to Worklio</title>
+    <link rel="stylesheet" href="ui.css" />
+  </head>
+  <body>
+    <main class="center">
+      <form class="card" id="form" novalidate>
+        <img class="logo" src="logo.png" alt="" />
+        <h1>Connect to your Worklio server</h1>
+        <p class="muted">Worklio runs on your team’s own server. Enter its address to sign in.</p>
+
+        <label for="url">Server address</label>
+        <input id="url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="chat.example.com" required />
+        <p class="hint muted">Ask whoever set up Worklio for the address. Running it on this computer? Use <code>localhost:3000</code>.</p>
+        <p class="error" id="error" role="alert"></p>
+
+        <div class="actions">
+          <button class="btn primary" id="connect" type="submit">Connect</button>
+          <button class="btn" id="cancel" type="button" hidden>Cancel</button>
+        </div>
+      </form>
+    </main>
+    <script type="module" src="setup.js"></script>
+  </body>
+</html>

@@ -135,6 +135,16 @@ To see Worklio full of realistic content, seed the demo workspace with fictional
 python3 scripts/seed_demo.py /tmp/worklio-demo.json   # the JSON file contains the demo logins
 ```
 
+### Desktop app
+
+Worklio has a desktop app for macOS, Windows and Linux in [`desktop/`](desktop/). It opens your server in its own window with a dock or taskbar unread badge, notifications while you're in another app, and a screen-share picker. On first launch it asks for your server's address. To try it against a local server:
+
+```bash
+cd desktop && npm install && npm start
+```
+
+Installers are built by GitHub Actions; see [desktop/README.md](desktop/README.md).
+
 ### Going to production
 
 `docker-compose.prod.yml` runs the whole stack on one server with non-root images, security headers and startup checks that refuse weak secrets. Put a TLS reverse proxy in front and you're done; the step-by-step guide, with a Caddy example, is in **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
@@ -206,6 +216,7 @@ backend/            FastAPI app, Alembic migrations, tests  (see backend/README.
   app/ai/           AI providers, retrieval tools, agent, captions, key encryption
   app/workers/      Celery app, periodic and background tasks
   app/models/       SQLAlchemy models
+desktop/            Electron desktop app for macOS, Windows, Linux  (see desktop/README.md)
 frontend/           Next.js web app  (see frontend/README.md)
   src/app/          routes (/login, /new, /invite/[token], /w/[workspaceId]/...)
   src/components/   feature folders (chat, workspace, calls, huddle, canvas, board, ai, admin, ...)
@@ -241,6 +252,7 @@ docs/               architecture, configuration, deployment, roadmap, lessons le
 - Member and channel lists load in full (fine for hundreds of people, not tens of thousands).
 - No web push, email invitations, PWA or huddle recording yet. Scheduled meetings don't repeat yet.
 - No Playwright end-to-end suite yet.
+- Desktop builds aren't code-signed yet, so macOS and Windows warn on first open, and the app doesn't update itself.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for what's planned.
 
