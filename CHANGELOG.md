@@ -9,6 +9,8 @@ versions may include breaking changes.
 ## [Unreleased]
 
 ### Added
+- README rewritten around why Worklio exists (cost, data ownership, no lock-in), with Full HD screenshots of every product area, plus translations in Simplified Chinese, Japanese, Korean, Spanish, French, German, Brazilian Portuguese, Arabic and Urdu.
+- `docs/SCREENSHOTS.md`: all 46 screens in lossless 1920×1080 PNG with descriptions.
 - MIT license, contributing guide, code of conduct, security policy, issue and pull request
   templates, and a CI workflow for backend and frontend checks.
 - Documentation: architecture, configuration reference, roadmap, lessons learned, and package
