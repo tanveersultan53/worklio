@@ -14,6 +14,11 @@
   <a href="https://github.com/tanveersultan53/worklio/releases"><img src="https://img.shields.io/github/v/release/tanveersultan53/worklio" alt="Latest release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-007a5a" alt="MIT license"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-2fb3e8" alt="Pull requests welcome"></a>
+  <a href="https://github.com/sponsors/tanveersultan53"><img src="https://img.shields.io/badge/%E2%99%A5_Sponsor-Worklio-e5375f?style=flat&logo=githubsponsors&logoColor=white" alt="Sponsor Worklio on GitHub"></a>
+</p>
+
+<p align="center">
+  <strong>❤️ Worklio is free and independent. <a href="https://github.com/sponsors/tanveersultan53">Sponsor it on GitHub</a> to keep it that way.</strong>
 </p>
 
 <p align="center">
@@ -261,9 +266,13 @@ Before running Worklio anywhere other than your laptop, read the production chec
 
 ## Support Worklio
 
-Worklio is free and always will be. If it saves your team money or keeps your data where it belongs, please consider supporting its development:
+<p>
+  <a href="https://github.com/sponsors/tanveersultan53"><img src="https://img.shields.io/badge/%E2%99%A5_Sponsor_Worklio_on_GitHub-e5375f?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor Worklio on GitHub" height="40"></a>
+</p>
 
-- **[Sponsor on GitHub](https://github.com/sponsors/tanveersultan53)**, one-off or monthly.
+**Worklio is free and always will be.** If it saves your team money or keeps your data where it belongs, please consider supporting its development:
+
+- **[Sponsor on GitHub](https://github.com/sponsors/tanveersultan53)**, one-off or monthly. Sponsors pay for docs and demo hosting, code signing for the desktop apps, and time to ship the roadmap.
 - **Star the repository** and share it with teams who pay too much for chat.
 - **Contribute** code, docs, translations or bug reports.
 
