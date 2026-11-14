@@ -58,7 +58,7 @@ jobs:
         working-directory: backend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Service containers can't take a custom command, so SeaweedFS (S3) is started here with the
       # same flags and dev credentials as docker-compose.yml. Upload tests need it.
@@ -113,7 +113,7 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
