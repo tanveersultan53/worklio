@@ -20,6 +20,7 @@ import { useWorkspace, WorkspaceProvider } from "./provider";
 import { QuickSwitcher } from "./quick-switcher";
 import { Rail, type SidebarView } from "./rail";
 import { setSidebarHidden, Sidebar, useSidebarHidden, useSidebarSync } from "./sidebar";
+import { MobileTabBar } from "./mobile-tab-bar";
 import { TopBar } from "./top-bar";
 
 export function WorkspaceShell({ children }: { children: React.ReactNode }) {
@@ -49,6 +50,11 @@ function Layout({ children }: { children: React.ReactNode }) {
   const focusMode = useSidebarHidden();
   const router = useRouter();
   const [view, setView] = useState<SidebarView>("home");
+  // Phones work like Slack's app: a list (Home / DMs) with bottom tabs, and full-screen
+  // conversations with a back button (no top bar or tabs while you're in one).
+  const shellPath = usePathname();
+  const inConversation = /^\/w\/[^/]+\/c\//.test(shellPath);
+  const onHomeList = shellPath === `/w/${ws.workspaceId}`;
   const appearance = useAppearance();
   const { update: updatePrefs } = appearance;
   useSidebarSync();
@@ -138,7 +144,9 @@ function Layout({ children }: { children: React.ReactNode }) {
       className="flex h-dvh flex-col overflow-hidden overscroll-none bg-chrome pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)]"
       style={{ backgroundImage: "var(--chrome-gradient)" }}
     >
-      <TopBar />
+      <div className={cn(inConversation && "hidden md:block")}>
+        <TopBar />
+      </div>
       <ConnectionBanner status={connection} />
       <div className="flex min-h-0 flex-1">
         <div className={cn("hidden md:flex", focusMode && "md:hidden")}>
@@ -159,12 +167,22 @@ function Layout({ children }: { children: React.ReactNode }) {
               <ResizeHandle />
             </aside>
           )}
-          <main className="relative flex min-w-0 flex-1 bg-background">
+          {onHomeList && (
+            // Phones: the workspace home is the channel/DM list itself, like Slack's Home tab.
+            <div className="flex min-w-0 flex-1 overflow-hidden bg-side md:hidden">
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <Sidebar view={view} />
+              </div>
+            </div>
+          )}
+          <main className={cn("relative flex min-w-0 flex-1 bg-background", onHomeList && "hidden md:flex")}>
             {children}
             {focusMode && <SidebarPeek view={view} onView={setView} />}
           </main>
         </div>
       </div>
+
+      {!inConversation && <MobileTabBar view={view} onView={setView} />}
 
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent
