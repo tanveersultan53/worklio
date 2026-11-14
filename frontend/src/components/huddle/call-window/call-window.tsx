@@ -45,6 +45,7 @@ import { cn } from "@/lib/utils";
 import { EffectsDialogHost } from "../effects-host";
 import { useHuddleRoom, useHuddles } from "../huddle-provider";
 import { LG_QUERY, useIsDesktop, useMediaQuery } from "../hooks";
+import { callHeaderLabel } from "./call-header-label";
 import { ChatPanel, useCallChat } from "./chat-panel";
 import { CallControls, Tip, type StageOption, useScreenShare } from "./controls";
 import { NotesPanel } from "./notes-panel";
@@ -135,8 +136,13 @@ export function CallWindow({
   const title = channel ? (channel.kind === "dm" ? channelLabel(channel) : channel.name) : "Call";
   const ChannelIcon = channel?.kind === "private" ? Lock : channel?.kind === "dm" ? null : Hash;
   const kind = call?.kind ?? callKind;
-  const isVideo = kind === "video";
-  const KindIcon = isVideo ? Video : call ? Phone : Headphones;
+  const label = callHeaderLabel({
+    kind,
+    direct: channel?.kind === "dm",
+    started: !!call,
+    cameraOn: snap.participants.some((p) => p.cameraTrack !== null),
+  });
+  const KindIcon = label === "Video call" ? Video : label === "Audio call" ? Phone : Headphones;
 
   const [prefs, setPrefs] = useState<Prefs>(readPrefs);
   const [pinnedId, setPinnedId] = useState<string | null>(null);
@@ -406,7 +412,7 @@ export function CallWindow({
                       <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:animate-none" />
                       <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
                     </span>
-                    <span className="hidden sm:inline">{isVideo ? "Video call" : call ? "Audio call" : "Huddle"}</span>
+                    <span className="hidden sm:inline">{label}</span>
                     <span aria-hidden className="hidden sm:inline">
                       ·
                     </span>
