@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://worklio.tanveersultan.com/"><img src="https://img.shields.io/badge/%E2%96%B6_Try_the_live_demo-worklio.tanveersultan.com-007a5a?style=for-the-badge" alt="Try the live demo at worklio.tanveersultan.com" height="36"></a>
+  <a href="https://worklio.tanveersultan.com/invite/eK0tvVKRa8cXB0fJDH9f9hfe8JkUJVve"><img src="https://img.shields.io/badge/%E2%96%B6_Try_the_live_demo-worklio.tanveersultan.com-007a5a?style=for-the-badge" alt="Try the live demo at worklio.tanveersultan.com" height="36"></a>
 </p>
 
 <p align="center">
@@ -127,7 +127,9 @@ Roles (owner, admin, member, guest), permissions enforced on the server, invite 
 
 ## Try it
 
-**Live demo: [worklio.tanveersultan.com](https://worklio.tanveersultan.com/)**. Create an account, start a workspace and invite a friend to try channels, threads, huddles, canvases and boards. It's a shared demo server, so please don't put anything private there; host your own copy for real work (below).
+**▶ [Join the live demo workspace](https://worklio.tanveersultan.com/invite/eK0tvVKRa8cXB0fJDH9f9hfe8JkUJVve)**: create an account and you land in *Worklio Demo*, a fictional team with channels, threads, a poll, a launch board and DMs already going. Start a huddle, react, @mention someone or make your own channel.
+
+It's a shared public demo on [worklio.tanveersultan.com](https://worklio.tanveersultan.com/), so please don't post anything private there; host your own copy for real work (below).
 
 ## Self-host in five minutes
 
