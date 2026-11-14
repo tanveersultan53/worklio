@@ -69,7 +69,7 @@ You don't need write access. The usual flow:
    approves them.
 5. **Review:** a code owner reviews the PR. Pushing new commits after an approval dismisses it,
    so the final version is always the reviewed one. Resolve every review conversation.
-6. **Merge:** a maintainer squash-merges the PR, so the PR title becomes the commit on `main`.
+6. **Merge:** the lead maintainer squash-merges the PR, so the PR title becomes the commit on `main`. Only the lead maintainer can merge; approvals from other maintainers are reviews, not merges.
    Use a [Conventional Commits](https://www.conventionalcommits.org/) style title.
 
 `main` is protected by a ruleset: nobody, maintainers included, can push to it directly, force

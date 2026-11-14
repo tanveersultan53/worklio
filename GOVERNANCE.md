@@ -11,7 +11,7 @@ and how decisions are made.
 | **User** | Anyone using Worklio | Report bugs, request features, join Discussions | None needed |
 | **Contributor** | Anyone who has opened an issue or pull request | Everything a user can, plus propose changes through pull requests from a fork | None needed (fork) |
 | **Triager** | Trusted contributors who help keep issues tidy | Label, assign and close issues and PRs, mark duplicates, request more information | Triage |
-| **Maintainer** | Contributors with a sustained record of good work in an area | Review and approve pull requests in their area, push branches to this repository, guide design decisions | Write |
+| **Maintainer** | Contributors with a sustained record of good work in an area | Review and approve pull requests in their area, push branches to this repository, guide design decisions. Maintainers do not merge into `main`. | Write |
 | **Lead maintainer** | [@tanveersultan53](https://github.com/tanveersultan53) | Final approval for everything that lands in `main`, releases, repository settings, security responses, and adding or removing maintainers | Admin |
 
 ### Users and contributors
@@ -68,8 +68,9 @@ directly:
 3. A code owner must approve. New commits after an approval dismiss it, and the most recent push
    must be approved by someone other than its author.
 4. All review conversations must be resolved.
-5. Pull requests are squash-merged, so `main` has a linear history with one commit per change.
-6. Force pushes and deleting `main` are blocked.
+5. **Only the lead maintainer merges.** `main` is restricted so that only the repository admin can update it, and only by merging a pull request. Approvals from other maintainers count as reviews.
+6. Pull requests are squash-merged, so `main` has a linear history with one commit per change.
+7. Force pushes and deleting `main` are blocked.
 
 Release tags (`v*`) can only be created, moved or deleted by admins.
 
