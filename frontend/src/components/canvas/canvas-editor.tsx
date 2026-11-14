@@ -92,9 +92,9 @@ const PROSE = [
   "[&_hr]:my-8 [&_hr]:border-t [&_hr]:border-border [&_hr.ProseMirror-selectednode]:border-link",
   "[&_ul]:my-2.5 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-2.5 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_li]:pl-1 [&_li>p]:my-0 [&_li::marker]:text-muted-foreground",
   "[&_ul[data-type=taskList]]:list-none [&_ul[data-type=taskList]]:pl-0.5",
-  "[&_li[data-type=taskItem]]:flex [&_li[data-type=taskItem]]:items-start [&_li[data-type=taskItem]]:gap-2.5 [&_li[data-type=taskItem]]:pl-0",
-  "[&_li[data-type=taskItem]>label]:mt-[0.3rem] [&_li[data-type=taskItem]>label]:flex [&_li[data-type=taskItem]>label]:shrink-0 [&_li[data-type=taskItem]>label]:select-none",
-  "[&_li[data-type=taskItem]>div]:min-w-0 [&_li[data-type=taskItem]>div]:flex-1",
+  "[&_ul[data-type=taskList]>li]:flex [&_ul[data-type=taskList]>li]:items-start [&_ul[data-type=taskList]>li]:gap-2.5 [&_ul[data-type=taskList]>li]:pl-0",
+  "[&_ul[data-type=taskList]>li>label]:mt-[0.3rem] [&_ul[data-type=taskList]>li>label]:flex [&_ul[data-type=taskList]>li>label]:shrink-0 [&_ul[data-type=taskList]>li>label]:select-none",
+  "[&_ul[data-type=taskList]>li>div]:min-w-0 [&_ul[data-type=taskList]>li>div]:flex-1",
   "[&_li[data-checked=true]>div]:text-muted-foreground [&_li[data-checked=true]>div]:line-through",
   "[&_input[type=checkbox]]:size-4 [&_input[type=checkbox]]:cursor-pointer [&_input[type=checkbox]]:accent-[var(--send)]",
   // tables
