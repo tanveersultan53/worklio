@@ -250,7 +250,9 @@ function InviteForm({ channelId, inCall, onDone }: { channelId: string; inCall: 
   const [busy, setBusy] = useState(false);
   const [channelMembers, setChannelMembers] = useState<string[] | null>(null);
 
-  const restricted = channel?.kind === "private" || channel?.kind === "dm";
+  // Private channels: members only. In a DM anyone can be added; the call then moves to a group DM.
+  const restricted = channel?.kind === "private";
+  const isDM = channel?.kind === "dm";
   useEffect(() => {
     if (!restricted) return;
     let cancelled = false;
@@ -299,6 +301,7 @@ function InviteForm({ channelId, inCall, onDone }: { channelId: string; inCall: 
           {inCall
             ? "They'll get a ringing call they can pick up from anywhere in Worklio."
             : `A ${kind === "video" ? "video" : "audio"} huddle starts in ${where} and rings everyone you pick.`}
+          {isDM && " Picking someone new moves the call to a group conversation with all of you."}
         </DialogDescription>
       </DialogHeader>
 

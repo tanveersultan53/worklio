@@ -17,12 +17,21 @@ import { isCallLive } from "@/components/calls/types";
 import { enableCameraWithEffects } from "@/components/effects/engine";
 import { CameraEffectsSync } from "@/components/effects/sync";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
-import { api, API_URL, auth } from "@/lib/api";
+import { api, API_URL, auth, type Channel } from "@/lib/api";
 import { errorMessage, toast } from "@/lib/toast";
 
 import { DEFAULT_MEDIA, type MediaChoice, PreJoinDialog, type PreJoinMode, type PreJoinRequest, preJoinSkip } from "./pre-join";
 import { HuddleRoomStore, IDLE_STORE, isUserCancelled, mediaErrorMessage } from "./room-store";
 import type { HuddleInfo, HuddleRoomSnapshot, HuddleStatus, HuddleUpdatedEvent } from "./types";
+
+/**
+ * LiveKit data topic: "this call is moving to `channelId`". Sent by whoever adds someone from
+ * outside a DM; everyone else in the room follows into the new group DM's call.
+ */
+const TOPIC_MOVE = "move";
+const moveCodec = { enc: new TextEncoder(), dec: new TextDecoder() };
+/** How long a follower waits for the new call to show up before joining anyway. */
+const MOVE_WAIT_MS = 12_000;
 
 // --- LiveKit logging ---
 // LiveKit logs routine teardown chatter ("could not createOffer with closed peer connection",
@@ -198,7 +207,7 @@ function beaconLeave(channelId: string, callId: string | null | undefined) {
 const othersIn = (ids: string[], me: string | undefined) => ids.some((id) => id !== me);
 
 export function HuddleProvider({ children }: { children: React.ReactNode }) {
-  const { workspaceId, me, channels, memberById } = useWorkspace();
+  const { workspaceId, me, channels, memberById, reloadChannels } = useWorkspace();
 
   const [huddleState, setHuddleState] = useState<{ workspaceId: string; map: Record<string, HuddleInfo> }>({
     workspaceId: "",
@@ -225,6 +234,10 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
   const connectingRoomRef = useRef<Room | null>(null);
   /** The pending "Ready to join?" check, if any. */
   const preJoinRef = useRef<PreJoinRequest | null>(null);
+  /** Follow someone who moved this call to a group DM (set below, once `connect` exists). */
+  const followMoveRef = useRef<((channelId: string, fromId: string, video: boolean) => void) | null>(null);
+  /** startCall, for re-entering it with the group DM it just opened. */
+  const startCallRef = useRef<((channelId: string, kind: CallKind, inviteeIds?: string[]) => Promise<void>) | null>(null);
 
   useEffect(() => {
     meIdRef.current = me?.id;
@@ -410,6 +423,17 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
           if (seq !== seqRef.current || Date.now() < quietUntil || p.identity === meIdRef.current) return;
           playLeaveTone();
         });
+        room.on(RoomEvent.DataReceived, (payload, participant, _kind, topic) => {
+          if (topic !== TOPIC_MOVE || seq !== seqRef.current || !participant) return;
+          try {
+            const msg = JSON.parse(moveCodec.dec.decode(payload)) as { channelId?: unknown };
+            if (typeof msg.channelId === "string") {
+              followMoveRef.current?.(msg.channelId, participant.identity, room.localParticipant.isCameraEnabled);
+            }
+          } catch {
+            // Not a move message.
+          }
+        });
         room.on(RoomEvent.Reconnected, () => {
           quietUntil = Date.now() + ROSTER_SETTLE_MS;
           const s = sessionRef.current;
@@ -530,16 +554,99 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
   );
 
   // --- Calls ---
+
+  /**
+   * Adding people who aren't in a DM: open (or reuse) the group DM with everyone, the way Slack
+   * turns a 1:1 huddle into a group one. Returns null when everyone is already in the DM.
+   */
+  const groupDmFor = useCallback(
+    async (channelId: string, extraIds: string[], alsoIds: string[] = []): Promise<Channel | null> => {
+      if (!dmChannelsRef.current.has(channelId)) return null;
+      const memberIds = await api<string[]>(`/channels/${channelId}/members`);
+      if (extraIds.every((id) => memberIds.includes(id))) return null;
+      const everyone = [...new Set([...memberIds, ...alsoIds, ...extraIds])].filter((id) => id !== meIdRef.current);
+      const dm = await api<Channel>(`/workspaces/${workspaceId}/dms`, {
+        method: "POST",
+        body: JSON.stringify({ user_ids: everyone }),
+      });
+      await reloadChannels().catch(() => {});
+      return dm;
+    },
+    [workspaceId, reloadChannels],
+  );
+
+  /** Move my live DM call to `dm`: tell the room to follow, then start the call there ringing `ring`. */
+  const moveCallTo = useCallback(
+    async (cur: Session, dm: Channel, ring: string[]) => {
+      const room = cur.store?.room;
+      const video = room?.localParticipant.isCameraEnabled ?? cur.kind === "video";
+      if (room) {
+        await room.localParticipant
+          .publishData(moveCodec.enc.encode(JSON.stringify({ channelId: dm.id })), { reliable: true, topic: TOPIC_MOVE })
+          .catch(() => {});
+      }
+      await connect(
+        dm.id,
+        cur.kind,
+        () =>
+          api<CallJoinResponse>(`/channels/${dm.id}/calls`, {
+            method: "POST",
+            body: JSON.stringify({ kind: cur.kind, invitee_ids: ring }),
+          }),
+        { video, failure: "Couldn't move the call to a group conversation" },
+      );
+    },
+    [connect],
+  );
+
+  // Someone in my call added people from outside our DM: follow them into the group DM's call.
+  useEffect(() => {
+    followMoveRef.current = (channelId, fromId, video) => {
+      const name = namesRef.current[fromId]?.full_name ?? "Someone";
+      toast.info(`${name} added people. Moving you to the group call…`);
+      void (async () => {
+        await reloadChannels().catch(() => {});
+        const until = Date.now() + MOVE_WAIT_MS;
+        while (!liveChannelsRef.current.has(channelId) && Date.now() < until) {
+          await new Promise((r) => setTimeout(r, 300));
+        }
+        if (sessionRef.current?.channelId === channelId) return;
+        await connect(
+          channelId,
+          "audio",
+          async () => ({
+            join: await api<CallJoin>(`/channels/${channelId}/huddle/join`, { method: "POST" }),
+            call: null,
+          }),
+          { video, failure: "Couldn't join the group call" },
+        );
+      })();
+    };
+  }, [connect, reloadChannels]);
+
   const inviteToCall = useCallback(
     async (userIds: string[]) => {
       const cur = sessionRef.current;
       const ids = userIds.filter((id) => id !== meIdRef.current);
       if (!ids.length) return;
-      if (!cur?.call) {
+      if (!cur?.call && !cur?.store) {
         toast.error("Join the call first, then invite people.");
         return;
       }
       try {
+        const present = cur.store ? [...cur.store.room.remoteParticipants.keys()] : [];
+        const dm = await groupDmFor(cur.channelId, ids, present);
+        if (dm) {
+          const others = await api<string[]>(`/channels/${dm.id}/members`);
+          // Ring the new people and anyone from the DM who isn't here; the rest follow the move.
+          const ring = others.filter((id) => id !== meIdRef.current && !present.includes(id));
+          await moveCallTo(cur, dm, ring);
+          return;
+        }
+        if (!cur.call) {
+          toast.error("Join the call first, then invite people.");
+          return;
+        }
         const call = await api<CallOut>(`/calls/${cur.call.id}/invite`, {
           method: "POST",
           body: JSON.stringify({ user_ids: ids }),
@@ -550,7 +657,7 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
         toast.error(errorMessage(err, "Couldn't ring them"));
       }
     },
-    [commit],
+    [commit, groupDmFor, moveCallTo],
   );
 
   const startCall = useCallback(
@@ -568,6 +675,19 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
           }
         }
         return;
+      }
+      // Ringing people from outside a DM: start the call in the group DM with all of them instead.
+      if (inviteeIds?.length) {
+        try {
+          const dm = await groupDmFor(channelId, inviteeIds.filter((id) => id !== meIdRef.current));
+          if (dm) {
+            const others = await api<string[]>(`/channels/${dm.id}/members`);
+            return await startCallRef.current?.(dm.id, kind, others.filter((id) => id !== meIdRef.current));
+          }
+        } catch (err) {
+          toast.error(errorMessage(err, "Couldn't start the call"));
+          return;
+        }
       }
       let media: MediaChoice | undefined;
       if (kind === "video") {
@@ -598,8 +718,11 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
         { video: kind === "video", media, failure: "Couldn't start the call" },
       );
     },
-    [connect, inviteToCall, askPreJoin],
+    [connect, inviteToCall, askPreJoin, groupDmFor],
   );
+  useEffect(() => {
+    startCallRef.current = startCall;
+  }, [startCall]);
 
   const acceptCall = useCallback(
     async (callId: string, withVideo: boolean, channelId?: string) => {
