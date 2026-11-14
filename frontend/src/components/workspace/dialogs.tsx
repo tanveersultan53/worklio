@@ -1,6 +1,6 @@
 "use client";
 
-import { Hash, Lock } from "lucide-react";
+import { Hash, Lock, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -243,6 +243,7 @@ export function BrowseChannelsDialog({ open, onOpenChange }: DialogProps) {
   const { workspaceId, channels, reloadChannels } = useWorkspace();
   const router = useRouter();
   const { error, run } = useSubmit();
+  const [creating, setCreating] = useState(false);
   const browsable = channels.filter((c) => c.kind === "public");
 
   const openChannel = (c: Channel) =>
@@ -256,33 +257,53 @@ export function BrowseChannelsDialog({ open, onOpenChange }: DialogProps) {
     });
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Browse channels</DialogTitle>
-        </DialogHeader>
-        <div className="max-h-[min(20rem,60dvh)] divide-y overflow-y-auto rounded-md border">
-          {browsable.map((c) => (
-            <div key={c.id} className="flex items-center gap-3 px-3 py-2 text-sm">
-              <Hash className="size-4 shrink-0 text-muted-foreground" />
-              <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{c.name}</div>
-                {c.topic && <div className="truncate text-xs text-muted-foreground">{c.topic}</div>}
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader className="flex-row items-center justify-between gap-3 space-y-0 pr-8">
+            <DialogTitle>Browse channels</DialogTitle>
+            {/* Like Slack: "Add channels" leads here, so creating one is right at the top. */}
+            <Button
+              size="sm"
+              onClick={() => {
+                onOpenChange(false);
+                setCreating(true);
+              }}
+              className="shrink-0 gap-1 bg-send text-white hover:bg-send/90"
+            >
+              <Plus className="size-4" aria-hidden />
+              Create a channel
+            </Button>
+          </DialogHeader>
+          {browsable.length === 0 && (
+            <p className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+              No public channels yet. Create the first one.
+            </p>
+          )}
+          <div className={cn("max-h-[min(20rem,60dvh)] divide-y overflow-y-auto rounded-md border", !browsable.length && "hidden")}>
+            {browsable.map((c) => (
+              <div key={c.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+                <Hash className="size-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-medium">{c.name}</div>
+                  {c.topic && <div className="truncate text-xs text-muted-foreground">{c.topic}</div>}
+                </div>
+                <Button
+                  size="sm"
+                  className="shrink-0"
+                  variant={c.is_member ? "outline" : "default"}
+                  onClick={() => openChannel(c)}
+                >
+                  {c.is_member ? "Open" : "Join"}
+                </Button>
               </div>
-              <Button
-                size="sm"
-                className="shrink-0"
-                variant={c.is_member ? "outline" : "default"}
-                onClick={() => openChannel(c)}
-              >
-                {c.is_member ? "Open" : "Join"}
-              </Button>
-            </div>
-          ))}
-        </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
-      </DialogContent>
-    </Dialog>
+            ))}
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </DialogContent>
+      </Dialog>
+      <NewChannelDialog open={creating} onOpenChange={setCreating} />
+    </>
   );
 }
 
