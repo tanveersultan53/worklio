@@ -74,7 +74,9 @@ export function PeoplePanel({
   const ringing = invites.filter((i) => i.status === "ringing");
   const ringingIds = new Set(ringing.map((i) => i.user_id));
 
-  const restricted = channel?.kind === "private" || channel?.kind === "dm";
+  // Private channels: members only. A DM can take anyone; adding them moves the call to a group DM.
+  const restricted = channel?.kind === "private";
+  const isDM = channel?.kind === "dm";
   const memberSet = channelMembers ? new Set(channelMembers) : null;
   const needle = q.trim().toLowerCase();
   const candidates = members
@@ -222,6 +224,11 @@ export function PeoplePanel({
               />
             </label>
           </div>
+          {isDM && (
+            <p className="px-3 pb-2 text-[11px] leading-snug text-muted-foreground">
+              Adding someone new moves this call to a group conversation with everyone.
+            </p>
+          )}
           <ul className="flex flex-col pb-3">
             {candidates.length === 0 && (
               <li className="px-3 py-2 text-xs text-muted-foreground">{needle ? "No matches." : "Everyone is already here."}</li>
@@ -232,7 +239,7 @@ export function PeoplePanel({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm">{m.full_name}</span>
                   {memberSet && !memberSet.has(m.user_id) && (
-                    <span className="block truncate text-[11px] text-muted-foreground">Not in this channel</span>
+                    <span className="block truncate text-[11px] text-muted-foreground">{isDM ? "Not in this conversation" : "Not in this channel"}</span>
                   )}
                 </span>
                 <RingButton busy={!!busy[m.user_id]} onClick={() => void ring(m.user_id)} label={`Ring ${m.full_name}`} />
