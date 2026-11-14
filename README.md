@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/channel.webp" alt="Worklio: the #general channel with reactions, a thread, a poll and a pinned message" width="900">
+  <img src="docs/screenshots/walkthrough.gif" alt="Worklio walkthrough: replying in a thread, switching to a launch board, and dark mode" width="960">
 </p>
 
 Worklio is a self-hostable workspace for teams. It has channels and DMs, threads, ringing calls
@@ -22,13 +22,16 @@ to use it, change it and build on it.
 
 ## Screenshots
 
-| Threads beside the conversation | Boards with priorities, labels and due dates |
+| Channels, reactions, polls and pins | Threads beside the conversation |
 |---|---|
-| ![A thread open next to the #general channel](docs/screenshots/thread.webp) | ![The launch board with To do, In progress and Done columns](docs/screenshots/board.webp) |
-| **Dark mode, code blocks and unread markers** | **Sign in** |
-| ![The #engineering channel in dark mode with a code block](docs/screenshots/dark-mode.webp) | ![The Worklio sign-in page](docs/screenshots/sign-in.webp) |
+| ![The #general channel with reactions, a thread, a poll and a pinned message](docs/screenshots/channel.webp) | ![A thread open next to the #general channel](docs/screenshots/thread.webp) |
+| **Boards with priorities, labels and due dates** | **Dark mode, code blocks and unread markers** |
+| ![The launch board with To do, In progress and Done columns](docs/screenshots/board.webp) | ![The #engineering channel in dark mode with a code block](docs/screenshots/dark-mode.webp) |
+| **Sign in** | |
+| ![The Worklio sign-in page](docs/screenshots/sign-in.webp) | |
 
-The screenshots use a demo workspace with fictional people.
+Screenshots are 1920×1080 (click to open full size) and use a demo workspace with fictional
+people. Recreate it with `python3 scripts/seed_demo.py /tmp/worklio-demo.json`.
 
 ## Features
 
