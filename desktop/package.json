@@ -20,9 +20,9 @@
     "dist:linux": "electron-builder --linux --publish never"
   },
   "devDependencies": {
-    "@types/node": "^22.20.5",
-    "electron": "45.2.3",
+    "@types/node": "^26.6.6",
+    "electron": "45.3.0",
     "electron-builder": "26.18.1",
-    "typescript": "5.9.3"
+    "typescript": "7.0.2"
   }
 }
