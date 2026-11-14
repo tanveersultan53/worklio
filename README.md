@@ -22,10 +22,10 @@ to use it, change it and build on it.
 
 ## See it in action
 
-**Huddles:** three people on camera, switching the stage to the whiteboard and the launch board, then raising a hand.
+**Huddles:** three people on camera sending emoji reactions, switching the stage to the whiteboard and the launch board, then raising a hand.
 
 <p align="center">
-  <img src="docs/screenshots/huddle.gif" alt="A Worklio huddle with three people: switching the stage to the whiteboard and the board, then raising a hand" width="900">
+  <img src="docs/screenshots/huddle.gif" alt="A Worklio huddle with three people sending emoji reactions, switching the stage to the whiteboard and the board, then raising a hand" width="900">
 </p>
 
 The demos use a demo workspace with fictional people. Recreate it with
