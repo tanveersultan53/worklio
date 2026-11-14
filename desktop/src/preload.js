@@ -24,5 +24,19 @@ if (location.protocol === "worklio-app:") {
     platform: process.platform,
     /** Bring the app window to the front (a notification was clicked). */
     focus: () => ipcRenderer.send("worklio:focus"),
+    /** Annotations on a screen I share, drawn over my real screen (see annotation-overlay.js). */
+    annotations: {
+      start: (/** @type {{ width: number, height: number }} */ info) =>
+        ipcRenderer.send("annotate:start", { width: Number(info?.width) || 0, height: Number(info?.height) || 0 }),
+      op: (/** @type {unknown} */ op) => ipcRenderer.send("annotate:op", op),
+      stop: () => ipcRenderer.send("annotate:stop"),
+      onOp: (/** @type {(op: unknown) => void} */ fn) => {
+        const listener = (/** @type {unknown} */ _e, /** @type {unknown} */ op) => fn(op);
+        ipcRenderer.on("annotate:op", listener);
+        return () => {
+          ipcRenderer.removeListener("annotate:op", listener);
+        };
+      },
+    },
   });
 }
