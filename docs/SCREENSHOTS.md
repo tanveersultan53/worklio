@@ -235,7 +235,7 @@ Calls ring: decline, answer with audio, or answer with video.
 
 ### Huddle
 
-People on camera in the meeting window, with emoji reactions labelled by sender.
+People on camera in the meeting window. A raised hand shows on the tile; emoji reactions float up labelled by sender.
 
 [![Huddle](screenshots/huddle.png)](screenshots/huddle.png)
 
