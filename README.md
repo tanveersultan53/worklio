@@ -74,7 +74,7 @@ Ring a teammate, start a huddle in a channel, or schedule one for later: it land
 
 | | |
 |---|---|
-| ![A huddle with three people and emoji reactions](docs/screenshots/huddle.png) | ![An incoming video call](docs/screenshots/incoming-call.png) |
+| ![A video huddle with three people, one with a raised hand](docs/screenshots/huddle.png) | ![An incoming video call](docs/screenshots/incoming-call.png) |
 | ![The whiteboard on stage during a call](docs/screenshots/huddle-whiteboard.png) | ![The board on stage during a call](docs/screenshots/huddle-board.png) |
 
 <p align="center">
