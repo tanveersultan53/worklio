@@ -78,7 +78,7 @@ Ring a teammate or start a huddle in a channel. Share your screen and draw on it
 | ![The whiteboard on stage during a call](docs/screenshots/huddle-whiteboard.png) | ![The board on stage during a call](docs/screenshots/huddle-board.png) |
 
 <p align="center">
-  <img src="docs/screenshots/huddle.gif" alt="A huddle: emoji reactions, switching the stage to the whiteboard and the board, then raising a hand" width="900">
+  <img src="docs/screenshots/huddle.gif" alt="A full-screen huddle: emoji reactions, the whiteboard and the board on stage, then a raised hand" width="900">
 </p>
 
 ### Make: docs, boards and whiteboards beside the chat
