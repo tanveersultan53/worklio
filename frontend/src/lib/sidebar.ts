@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 import { api, type Channel, type Message, type User } from "@/lib/api";
+import { bringToFront } from "@/lib/desktop";
 import type { NotifyLevel, NotifySchedule, Preferences } from "@/lib/appearance";
 import { errorMessage, toast } from "@/lib/toast";
 
@@ -509,7 +510,7 @@ export function showDesktopNotification(title: string, options: NotificationOpti
     const n = new Notification(title, opts);
     if (onClick)
       n.onclick = () => {
-        window.focus();
+        bringToFront();
         onClick();
       };
     return true;

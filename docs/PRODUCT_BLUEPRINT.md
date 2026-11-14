@@ -119,7 +119,8 @@ AI features are covered by tests with a mocked provider. They need a real provid
 | Installable PWA with offline shell | ⏳ [#32](https://github.com/tanveersultan53/worklio/issues/32) |
 | Large-workspace scale: virtualised message list, paginated member/channel lists | ⏳ [#16](https://github.com/tanveersultan53/worklio/issues/16), [#17](https://github.com/tanveersultan53/worklio/issues/17) |
 | i18n | ⏳ [#23](https://github.com/tanveersultan53/worklio/issues/23) |
-| Desktop app (Tauri): native screen annotation overlay, global shortcuts | ➖ later |
+| Desktop app (Electron): window, unread badge, notifications, screen-share picker, tray | ✅ [#46](https://github.com/tanveersultan53/worklio/issues/46) |
+| Desktop: signing, auto-update, deep links, screen annotation overlay, global shortcuts | ➖ later |
 | Mobile apps (React Native) | ➖ later |
 | Incoming/outgoing webhooks, bot tokens, app framework | ➖ later |
 

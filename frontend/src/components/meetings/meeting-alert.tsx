@@ -8,6 +8,7 @@ import { CallAvatarStack } from "@/components/calls/avatar-stack";
 import { playHuddleChime } from "@/components/calls/tones";
 import { useHuddles } from "@/components/huddle/huddle-provider";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
+import { bringToFront, isAway } from "@/lib/desktop";
 import { timeLabel, type Meeting } from "@/lib/meetings";
 
 /** How long the "starting now" card stays up if nobody acts on it. */
@@ -34,14 +35,14 @@ export function MeetingStartingAlert({ soundsMuted }: { soundsMuted: boolean }) 
       setList((l) => [...l.filter((x) => x.meeting.id !== m.id), { meeting: m, until: Date.now() + TTL_MS }].slice(-MAX));
       if (e.notify) {
         if (!soundsMuted) playHuddleChime();
-        if (typeof Notification !== "undefined" && document.hidden && Notification.permission === "granted") {
+        if (typeof Notification !== "undefined" && isAway() && Notification.permission === "granted") {
           try {
             const n = new Notification(`📅 ${m.title} is starting`, {
               body: "Click to open Worklio and join the huddle.",
               tag: `meeting-${m.id}`,
             });
             n.onclick = () => {
-              window.focus();
+              bringToFront();
               router.push(`/w/${workspaceId}/c/${m.channel_id}`);
               n.close();
             };

@@ -7,6 +7,7 @@ import { useHuddles } from "@/components/huddle/huddle-provider";
 import { MeetingStartingAlert } from "@/components/meetings/meeting-alert";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
 import { api } from "@/lib/api";
+import { bringToFront, isAway } from "@/lib/desktop";
 
 import { CallStyles, channelContext, firstName, ringingInvites, useTimedOut } from "./call-styles";
 import { IncomingCall } from "./incoming-call";
@@ -228,7 +229,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     if (!topId || typeof Notification === "undefined") return;
     let n: Notification | null = null;
     const show = () => {
-      if (n || !document.hidden || Notification.permission !== "granted") return;
+      if (n || !isAway() || Notification.permission !== "granted") return;
       try {
         n = new Notification(`${callerName} is calling you`, {
           body: `${topKind === "video" ? "Video call" : "Audio call"}${where ? ` · ${where}` : ""}`,
@@ -236,7 +237,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
           requireInteraction: true,
         });
         n.onclick = () => {
-          window.focus();
+          bringToFront();
           n?.close();
         };
       } catch {
@@ -245,8 +246,10 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     };
     show();
     document.addEventListener("visibilitychange", show);
+    window.addEventListener("blur", show);
     return () => {
       document.removeEventListener("visibilitychange", show);
+      window.removeEventListener("blur", show);
       n?.close();
     };
   }, [topId, callerName, topKind, where]);
