@@ -1,7 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Archive, ChevronDown, ChevronLeft, FileText, Hash, KanbanSquare, Lock, MessageSquare, NotebookPen, Pencil, PenLine, UserPlus } from "lucide-react";
+import {
+  Archive,
+  Bookmark,
+  ChevronDown,
+  ChevronLeft,
+  FileText,
+  Hash,
+  KanbanSquare,
+  Lock,
+  MessageSquare,
+  NotebookPen,
+  Pencil,
+  PenLine,
+  Pin,
+  UserPlus,
+} from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -17,10 +32,17 @@ import { ThreadPanel } from "@/components/chat/thread-panel";
 import { UserAvatar } from "@/components/chat/user-avatar";
 import { CallButtons } from "@/components/calls";
 import { BookmarksBar } from "@/components/messaging/bookmarks-bar";
-import { PinsButton, PinsPanel, usePins } from "@/components/messaging/pins";
+import { PinsPanel, usePins } from "@/components/messaging/pins";
 import { activeStatus, useNow } from "@/components/profile/profile-utils";
 import { StatusEmoji } from "@/components/profile/status-emoji";
 import { ChannelDetailsDialog, type DetailsTab } from "@/components/workspace/channel-details";
+import {
+  ChannelBell,
+  ChannelMoreMenu,
+  ChannelSearchButton,
+  MemberCountButton,
+  StarButton,
+} from "@/components/workspace/channel-header-actions";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
 import { WhiteboardTab } from "@/components/whiteboard";
 import { useMessageJump } from "@/hooks/use-message-jump";
@@ -98,6 +120,7 @@ function ChannelPane({
   const [details, setDetails] = useState<DetailsTab | null>(null);
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const [pinsOpen, setPinsOpen] = useState(false);
+  const [bookmarksShown, setBookmarksShown] = useState(true);
   const [summary, setSummary] = useState<SummaryRange | null>(null);
   const pins = usePins(channelId);
   const readTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -283,6 +306,7 @@ function ChannelPane({
             >
               <ChevronLeft className="size-5" aria-hidden />
             </Link>
+            {channel && <StarButton channel={channel} label={isDM ? label : `#${label}`} />}
             {isDM ? (
               dmPeer && (
                 // The popover trigger is an inline button; this grid cell gives it a width to truncate in.
@@ -328,37 +352,23 @@ function ChannelPane({
                     setSummary(r);
                   }}
                 />
-                <PinsButton
-                  count={pins.pins?.length ?? 0}
-                  active={pinsOpen && !ws.searchQuery}
-                  onClick={() => {
-                    ws.setSearchQuery(null);
-                    setSummary(null);
-                    setPinsOpen((o) => !o);
-                  }}
-                />
               </div>
             )}
+            {channel && !isDM && <MemberCountButton count={memberIds.length} onClick={() => setDetails("members")} />}
             {channel && <CallButtons channelId={channel.id} isDM={channel.kind === "dm"} className="shrink-0" />}
-            {channel && !isDM && (
-              <button
-                onClick={() => setDetails("members")}
-                className="hidden shrink-0 items-center gap-1.5 rounded-lg border py-0.5 pr-2 pl-1 hover:bg-muted sm:flex"
-                title="View members"
-              >
-                <span className="flex -space-x-1.5">
-                  {memberIds.slice(0, 3).map((id) => (
-                    <UserAvatar
-                      key={id}
-                      id={id}
-                      name={ws.memberById[id]?.full_name ?? "?"}
-                      size="sm"
-                      className="rounded ring-2 ring-background"
-                    />
-                  ))}
-                </span>
-                <span className="text-[13px] font-bold">{memberIds.length}</span>
-              </button>
+            {channel && <ChannelBell channel={channel} label={isDM ? label : `#${label}`} />}
+            {channel && (
+              <ChannelSearchButton
+                label={isDM ? label : `#${label}`}
+                onSearch={() => {
+                  setPinsOpen(false);
+                  setSummary(null);
+                  ws.setSearchQuery(`in:${channel.id}`);
+                }}
+              />
+            )}
+            {channel && (
+              <ChannelMoreMenu channel={channel} label={isDM ? label : `#${label}`} isDM={isDM} onDetails={setDetails} />
             )}
           </div>
           <nav
@@ -380,9 +390,41 @@ function ChannelPane({
                 <t.icon className="size-3.5" /> {t.label}
               </button>
             ))}
+            {/* Like Slack: Pins and Bookmarks sit with the tabs (they open a panel / show the bookmarks row). */}
+            {channel && (
+              <button
+                type="button"
+                aria-pressed={pinsOpen && !ws.searchQuery}
+                onClick={() => {
+                  ws.setSearchQuery(null);
+                  setSummary(null);
+                  setPinsOpen((o) => !o);
+                }}
+                className={cn(
+                  "-mb-px flex shrink-0 items-center gap-1.5 border-b-2 px-2 pt-1 pb-2.5 font-bold whitespace-nowrap md:pt-0 md:pb-2",
+                  pinsOpen && !ws.searchQuery ? "border-tab" : "border-transparent text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Pin className="size-3.5" aria-hidden /> Pins
+                {(pins.pins?.length ?? 0) > 0 && <span className="text-xs font-semibold text-muted-foreground">{pins.pins?.length}</span>}
+              </button>
+            )}
+            {channel && (
+              <button
+                type="button"
+                aria-pressed={bookmarksShown}
+                onClick={() => setBookmarksShown((v) => !v)}
+                className={cn(
+                  "-mb-px flex shrink-0 items-center gap-1.5 border-b-2 border-transparent px-2 pt-1 pb-2.5 font-bold whitespace-nowrap md:pt-0 md:pb-2",
+                  bookmarksShown ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Bookmark className={cn("size-3.5", bookmarksShown && "fill-current")} aria-hidden /> Bookmarks
+              </button>
+            )}
           </nav>
         </header>
-        {channel && <BookmarksBar channelId={channelId} readOnly={channel.is_archived} />}
+        {channel && bookmarksShown && <BookmarksBar channelId={channelId} readOnly={channel.is_archived} />}
 
         {tab === "files" ? (
           <FilesTab channelId={channelId} />

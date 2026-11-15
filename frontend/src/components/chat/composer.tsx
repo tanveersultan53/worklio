@@ -20,13 +20,14 @@ import {
   Smile,
   Sparkles,
   SquareCode,
+  SquareSlash,
   Strikethrough,
   Users,
   Video,
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import {
   AGENT_ADD_HINT,
@@ -86,6 +87,44 @@ import { EmojiPicker } from "./emoji-picker";
 import { UserAvatar } from "./user-avatar";
 
 type Pending = { key: string; name: string; preview?: string; attachment?: Attachment; error?: string };
+
+// --- "Aa": formatting toolbar shown or hidden, per device (hidden by default, like Slack) ---
+
+const FORMATTING_KEY = "worklio.composer.formatting";
+const formattingListeners = new Set<() => void>();
+
+function readFormattingPref(): boolean {
+  try {
+    return localStorage.getItem(FORMATTING_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setFormattingPref(on: boolean) {
+  try {
+    localStorage.setItem(FORMATTING_KEY, on ? "1" : "0");
+  } catch {
+    // storage blocked: the toggle still works for this page
+  }
+  formattingOverride = on;
+  formattingListeners.forEach((fn) => fn());
+}
+
+let formattingOverride: boolean | null = null;
+
+function useFormattingPref(): boolean {
+  return useSyncExternalStore(
+    (fn) => {
+      formattingListeners.add(fn);
+      return () => {
+        formattingListeners.delete(fn);
+      };
+    },
+    () => formattingOverride ?? readFormattingPref(),
+    () => false,
+  );
+}
 
 /** Formatting toolbar: markers wrapped around the selection. */
 const TOOLS: { icon: typeof Bold; label: string; keys?: string; before: string; after: string; fill: string }[] = [
@@ -167,6 +206,16 @@ export function Composer({
   /** A voice message being recorded/previewed; replaces the text area while set. */
   const [voice, setVoice] = useState<VoiceStart | null>(null);
   const [slashIndex, setSlashIndex] = useState(0);
+  const showFormatting = useFormattingPref();
+  const toggleFormatting = () => setFormattingPref(!showFormatting);
+  /** "/" opens the command menu in an empty message (never overwrites what's typed). */
+  const startCommand = () => {
+    if (!body.trim()) setBody("/");
+    requestAnimationFrame(() => {
+      input.current?.focus();
+      if (!body.trim()) input.current?.setSelectionRange(1, 1);
+    });
+  };
   /** The "/…" text the user dismissed the command menu for (Escape). */
   const [slashDismissed, setSlashDismissed] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
@@ -686,7 +735,12 @@ export function Composer({
           />
         ) : (
         <>
-        <div className="hidden items-center gap-0.5 rounded-t-xl bg-composer-toolbar px-1.5 py-1 sm:flex">
+        <div
+          className={cn(
+            "hidden items-center gap-0.5 rounded-t-xl bg-composer-toolbar px-1.5 py-1",
+            showFormatting && "sm:flex",
+          )}
+        >
           {TOOLS.map((t) => (
             <Hint
               key={t.label}
@@ -898,20 +952,30 @@ export function Composer({
                 <MonitorPlay className="size-4" /> Record screen or video
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => {
-                  setBody("/");
-                  requestAnimationFrame(() => {
-                    input.current?.focus();
-                    input.current?.setSelectionRange(1, 1);
-                  });
-                }}
-              >
+              <DropdownMenuItem onClick={startCommand}>
                 <SquareCode className="size-4" /> Run a command
                 <span className="ml-auto text-xs text-muted-foreground">/</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {/* Like Slack: "Aa" shows or hides the formatting toolbar (remembered on this device). */}
+          <Hint
+            label={showFormatting ? "Hide formatting" : "Show formatting"}
+            trigger={
+              <button
+                type="button"
+                onClick={toggleFormatting}
+                aria-pressed={showFormatting}
+                aria-label={showFormatting ? "Hide formatting" : "Show formatting"}
+                className={cn(
+                  "hidden shrink-0 rounded px-1.5 py-1 text-[15px] leading-none font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 sm:block",
+                  showFormatting && "bg-muted text-foreground",
+                )}
+              />
+            }
+          >
+            Aa
+          </Hint>
           <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
             <Hint
               label="Emoji"
@@ -981,13 +1045,29 @@ export function Composer({
               <AtSign className="size-[18px]" aria-hidden />
             </Hint>
           </span>
-          <VoiceRecordButton onStart={setVoice} className="shrink-0" />
+          <span aria-hidden className="mx-1 hidden h-5 w-px bg-border sm:block" />
           <span ref={videoSlot} className="hidden items-center sm:flex">
             <VideoClipButton workspaceId={workspaceId} channelId={channelId} parentId={parentId} onSent={onSent} />
           </span>
+          <VoiceRecordButton onStart={setVoice} className="shrink-0" />
           <span ref={recordSlot} className="hidden items-center sm:flex">
             <RecordClipButton workspaceId={workspaceId} channelId={channelId} parentId={parentId} onSent={onSent} />
           </span>
+          <span aria-hidden className="mx-1 hidden h-5 w-px bg-border sm:block" />
+          <Hint
+            label="Run a shortcut or command"
+            keys="/"
+            trigger={
+              <button
+                type="button"
+                onClick={startCommand}
+                aria-label="Run a shortcut or command"
+                className="hidden shrink-0 rounded p-1.5 text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 sm:block"
+              />
+            }
+          >
+            <SquareSlash className="size-[18px]" aria-hidden />
+          </Hint>
           <input ref={fileInput} type="file" multiple hidden onChange={(e) => addFiles(e.target.files)} />
           <SendSplit
             canSend={canSend}
