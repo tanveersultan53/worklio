@@ -267,12 +267,13 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
   }, [workspaceId, reloadKey]);
 
   // --- Leaving ---
-  const leave = useCallback(() => {
+  /** Leave the call. `keepWindow` (moving to another call) leaves the call window open. */
+  const leave = useCallback((opts?: { keepWindow?: boolean }) => {
     const cur = sessionRef.current;
     if (!cur) return;
     seqRef.current++;
     commit(null);
-    setExpanded(false);
+    if (opts?.keepWindow !== true) setExpanded(false);
     if (cur.store) void closeRoom(cur.store.room, cur.store);
     const pending = connectingRoomRef.current;
     connectingRoomRef.current = null;
@@ -359,10 +360,10 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
       channelHint: string,
       kind: CallKind,
       request: () => Promise<{ join: CallJoin; call: CallOut | null }>,
-      opts: { video: boolean; failure: string; media?: MediaChoice },
+      opts: { video: boolean; failure: string; media?: MediaChoice; keepWindow?: boolean },
     ) => {
       const media = opts.media ?? DEFAULT_MEDIA;
-      if (sessionRef.current) leave();
+      if (sessionRef.current) leave({ keepWindow: opts.keepWindow });
 
       const seq = ++seqRef.current;
       commit({ channelId: channelHint, status: "connecting", store: null, joinedAt: Date.now(), call: null, kind });
@@ -593,7 +594,7 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
             method: "POST",
             body: JSON.stringify({ kind: cur.kind, invitee_ids: ring }),
           }),
-        { video, failure: "Couldn't move the call to a group conversation" },
+        { video, failure: "Couldn't move the call to a group conversation", keepWindow: true },
       );
     },
     [connect],
@@ -618,7 +619,7 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
             join: await api<CallJoin>(`/channels/${channelId}/huddle/join`, { method: "POST" }),
             call: null,
           }),
-          { video, failure: "Couldn't join the group call" },
+          { video, failure: "Couldn't join the group call", keepWindow: true },
         );
       })();
     };
