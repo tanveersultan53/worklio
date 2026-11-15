@@ -357,7 +357,7 @@ function MessageRow({
             })}
             <Popover>
               <PopoverTrigger
-                className="flex h-7 items-center rounded-full bg-pill px-2 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-foreground focus-visible:opacity-100 data-popup-open:opacity-100 sm:h-6 [@media(hover:none)]:opacity-100"
+                className="flex h-7 items-center rounded-full border border-transparent bg-pill px-2 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 data-popup-open:border-muted-foreground/40 sm:h-6"
                 aria-label="Add reaction"
               >
                 <SmilePlus className="size-3.5" />
