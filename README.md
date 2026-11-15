@@ -14,6 +14,15 @@
   <a href="https://github.com/tanveersultan53/worklio/releases"><img src="https://img.shields.io/github/v/release/tanveersultan53/worklio" alt="Latest release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-007a5a" alt="MIT license"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-2fb3e8" alt="Pull requests welcome"></a>
+  <a href="https://github.com/sponsors/tanveersultan53"><img src="https://img.shields.io/badge/%E2%99%A5_Sponsor-Worklio-e5375f?style=flat&logo=githubsponsors&logoColor=white" alt="Sponsor Worklio on GitHub"></a>
+</p>
+
+<p align="center">
+  <a href="https://worklio.tanveersultan.com/invite/eK0tvVKRa8cXB0fJDH9f9hfe8JkUJVve"><img src="https://img.shields.io/badge/%E2%96%B6_Try_the_live_demo-worklio.tanveersultan.com-007a5a?style=for-the-badge" alt="Try the live demo at worklio.tanveersultan.com" height="36"></a>
+</p>
+
+<p align="center">
+  <strong>❤️ Worklio is free and independent. <a href="https://github.com/sponsors/tanveersultan53">Sponsor it on GitHub</a> to keep it that way.</strong>
 </p>
 
 <p align="center">
@@ -115,6 +124,12 @@ Roles (owner, admin, member, guest), permissions enforced on the server, invite 
 | ![Permissions](docs/screenshots/settings-permissions.png) | ![Members](docs/screenshots/settings-members.png) |
 
 **[See all 46 screens with descriptions →](docs/SCREENSHOTS.md)**
+
+## Try it
+
+**▶ [Join the live demo workspace](https://worklio.tanveersultan.com/invite/eK0tvVKRa8cXB0fJDH9f9hfe8JkUJVve)**: create an account and you land in *Worklio Demo*, a fictional team with channels, threads, a poll, a launch board and DMs already going. Start a huddle, react, @mention someone or make your own channel.
+
+It's a shared public demo on [worklio.tanveersultan.com](https://worklio.tanveersultan.com/), so please don't post anything private there; host your own copy for real work (below).
 
 ## Self-host in five minutes
 
@@ -261,9 +276,13 @@ Before running Worklio anywhere other than your laptop, read the production chec
 
 ## Support Worklio
 
-Worklio is free and always will be. If it saves your team money or keeps your data where it belongs, please consider supporting its development:
+<p>
+  <a href="https://github.com/sponsors/tanveersultan53"><img src="https://img.shields.io/badge/%E2%99%A5_Sponsor_Worklio_on_GitHub-e5375f?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor Worklio on GitHub" height="40"></a>
+</p>
 
-- **[Sponsor on GitHub](https://github.com/sponsors/tanveersultan53)**, one-off or monthly.
+**Worklio is free and always will be.** If it saves your team money or keeps your data where it belongs, please consider supporting its development:
+
+- **[Sponsor on GitHub](https://github.com/sponsors/tanveersultan53)**, one-off or monthly. Sponsors pay for docs and demo hosting, code signing for the desktop apps, and time to ship the roadmap.
 - **Star the repository** and share it with teams who pay too much for chat.
 - **Contribute** code, docs, translations or bug reports.
 
