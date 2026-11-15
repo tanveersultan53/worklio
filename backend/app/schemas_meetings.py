@@ -53,3 +53,15 @@ class MeetingOut(BaseModel):
     status: str
     message_id: uuid.UUID | None
     attendees: list[MeetingAttendeeOut]
+
+
+class BusyInterval(BaseModel):
+    start: datetime
+    end: datetime
+
+
+class FreeBusyOut(BaseModel):
+    """When someone is in a meeting: times only, never titles or channels."""
+
+    user_id: uuid.UUID
+    busy: list[BusyInterval]

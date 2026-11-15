@@ -270,3 +270,41 @@ async def test_reschedule_rearms_alerts(client, team):
     async with SessionLocal() as db:
         meeting = await db.get(Meeting, mid)
         assert meeting.reminded_at is None and meeting.started_notified_at is None
+
+
+async def test_free_busy_shows_times_only_and_respects_declines(client, team):
+    # Far enough ahead that no other test's meeting overlaps this window.
+    minutes = 60 * 24 * 9 + 37
+    m = (await _schedule(client, team, minutes=minutes)).json()
+    start = datetime.fromisoformat(m["starts_at"]) - timedelta(minutes=1)
+    end = datetime.fromisoformat(m["ends_at"]) + timedelta(minutes=1)
+    ids = [team[w]["id"] for w in ("alice", "bob", "carol")] + [str(uuid.uuid4())]
+
+    async def busy(who="carol"):
+        r = await client.get(
+            f"/workspaces/{team['ws']['id']}/meetings/busy",
+            params={"start": _iso(start), "end": _iso(end), "user_ids": ids},
+            headers=team[who]["headers"],
+        )
+        assert r.status_code == 200, r.text
+        return {row["user_id"]: row["busy"] for row in r.json()}
+
+    got = await busy()
+    # Strangers are dropped; the organizer and a pending invitee are busy, Carol is free.
+    assert set(got) == {team["alice"]["id"], team["bob"]["id"], team["carol"]["id"]}
+    assert len(got[team["alice"]["id"]]) == 1 and len(got[team["bob"]["id"]]) == 1
+    assert got[team["carol"]["id"]] == []
+    assert set(got[team["bob"]["id"]][0]) == {"start", "end"}
+
+    r = await client.put(
+        f"/meetings/{m['id']}/rsvp", json={"response": "declined"}, headers=team["bob"]["headers"]
+    )
+    assert r.status_code == 200, r.text
+    assert (await busy())[team["bob"]["id"]] == []
+
+    r = await client.get(
+        f"/workspaces/{team['ws']['id']}/meetings/busy",
+        params={"start": _iso(start), "end": _iso(start + timedelta(days=15)), "user_ids": ids[:1]},
+        headers=team["alice"]["headers"],
+    )
+    assert r.status_code == 400

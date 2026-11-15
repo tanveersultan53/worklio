@@ -41,7 +41,14 @@ from app.models import (
     WorkspaceRole,
 )
 from app.realtime.hub import notify_user, publish_to_channel
-from app.schemas_meetings import MeetingAttendeeOut, MeetingIn, MeetingOut, MeetingPatch
+from app.schemas_meetings import (
+    BusyInterval,
+    FreeBusyOut,
+    MeetingAttendeeOut,
+    MeetingIn,
+    MeetingOut,
+    MeetingPatch,
+)
 from app.services import serialize_messages
 
 log = logging.getLogger(__name__)
@@ -57,6 +64,8 @@ MAX_AHEAD = timedelta(days=366)
 PAST_SLACK = timedelta(minutes=5)
 MAX_ATTENDEES = 200
 MAX_RANGE = timedelta(days=62)
+MAX_BUSY_RANGE = timedelta(days=14)
+MAX_BUSY_PEOPLE = 50
 SWEEP_BATCH = 200
 
 MEETING_INVITE = "meeting_invite"
@@ -429,6 +438,61 @@ async def list_for_user(
         if channels[m.channel_id]:
             out.append(await serialize(db, m))
     return out
+
+
+async def free_busy(
+    db: AsyncSession,
+    workspace_id: uuid.UUID,
+    user_ids: list[uuid.UUID],
+    start: datetime,
+    end: datetime,
+) -> list[FreeBusyOut]:
+    """Busy times for workspace members in [start, end), for "find a time" when scheduling.
+
+    A meeting counts while it's scheduled and the person organizes it or hasn't declined.
+    Only start/end leave the server: no titles, channels or attendee lists.
+    """
+    if end <= start:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "end must be after start")
+    if end - start > MAX_BUSY_RANGE:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Ask for at most 14 days at a time")
+    ids = list(dict.fromkeys(user_ids))[:MAX_BUSY_PEOPLE]
+    members = {
+        uid for uid in ids if await get_workspace_membership(db, workspace_id, uid) is not None
+    }
+    busy: dict[uuid.UUID, list[BusyInterval]] = {uid: [] for uid in ids if uid in members}
+    if not busy:
+        return []
+    window = (
+        Meeting.workspace_id == workspace_id,
+        Meeting.status == MeetingStatus.scheduled,
+        Meeting.starts_at < end,
+        Meeting.ends_at > start,
+    )
+    rows = await db.execute(
+        select(MeetingAttendee.user_id, Meeting.starts_at, Meeting.ends_at)
+        .join(Meeting, Meeting.id == MeetingAttendee.meeting_id)
+        .where(
+            *window,
+            MeetingAttendee.user_id.in_(busy.keys()),
+            MeetingAttendee.response != RSVP.declined,
+        )
+    )
+    organized = await db.execute(
+        select(Meeting.organizer_id, Meeting.starts_at, Meeting.ends_at).where(
+            *window, Meeting.organizer_id.in_(busy.keys())
+        )
+    )
+    seen: set[tuple[uuid.UUID, datetime, datetime]] = set()
+    for uid, s, e in [*rows.all(), *organized.all()]:
+        if (uid, s, e) in seen:
+            continue
+        seen.add((uid, s, e))
+        busy[uid].append(BusyInterval(start=s, end=e))
+    return [
+        FreeBusyOut(user_id=uid, busy=sorted(intervals, key=lambda b: b.start))
+        for uid, intervals in busy.items()
+    ]
 
 
 # --- ICS (RFC 5545) ---------------------------------------------------------------------------
