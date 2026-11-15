@@ -8,6 +8,10 @@
 const { BrowserWindow, desktopCapturer, ipcMain } = require("electron");
 const path = require("node:path");
 
+/** display_id of the screen last picked in our picker ("" for a window), for the annotation overlay. */
+let lastDisplayId = /** @type {string | null} */ (null);
+const lastSharedDisplayId = () => lastDisplayId;
+
 /**
  * @param {{ session: Electron.Session, isTrusted: (url: string) => boolean, getWindow: () => BrowserWindow | null }} opts
  */
@@ -24,6 +28,7 @@ function installScreenSharePicker({ session, isTrusted, getWindow }) {
         const id = await choose(getWindow(), sources);
         const source = sources.find((s) => s.id === id);
         if (!source) return callback({});
+        lastDisplayId = source.display_id || null;
         // System audio can only be captured on Windows.
         callback({ video: source, audio: request.audioRequested && process.platform === "win32" ? "loopback" : undefined });
       } catch {
@@ -33,6 +38,7 @@ function installScreenSharePicker({ session, isTrusted, getWindow }) {
     // WORKLIO_SYSTEM_PICKER=0 forces Worklio's own picker on macOS too (for testing it).
     { useSystemPicker: process.env.WORKLIO_SYSTEM_PICKER !== "0" },
   );
+  // With the system picker (macOS 15+) we never learn which screen; the overlay matches by size.
 }
 
 /**
@@ -93,4 +99,4 @@ function choose(parent, sources) {
   });
 }
 
-module.exports = { installScreenSharePicker };
+module.exports = { installScreenSharePicker, lastSharedDisplayId };

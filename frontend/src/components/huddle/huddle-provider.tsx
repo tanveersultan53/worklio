@@ -15,6 +15,7 @@ import type {
 import { playJoinKnock, playLeaveTone } from "@/components/calls/tones";
 import { isCallLive } from "@/components/calls/types";
 import { enableCameraWithEffects } from "@/components/effects/engine";
+import { DesktopAnnotationBridge } from "@/components/annotate/desktop-overlay-bridge";
 import { CameraEffectsSync } from "@/components/effects/sync";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
 import { api, API_URL, auth, type Channel } from "@/lib/api";
@@ -907,6 +908,7 @@ export function HuddleProvider({ children }: { children: React.ReactNode }) {
     <Ctx.Provider value={value}>
       {children}
       <CameraEffectsSync room={session?.store?.room ?? null} userId={me?.id} />
+      <DesktopAnnotationBridge room={session?.store?.room ?? null} />
       <PreJoinDialog request={preJoin} />
     </Ctx.Provider>
   );

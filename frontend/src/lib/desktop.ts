@@ -2,10 +2,25 @@
  * The Worklio desktop app (Electron, see /desktop) exposes a tiny bridge on `window.worklioDesktop`.
  * In a browser it's absent and everything here falls back to plain web behaviour.
  */
+/** Screen-share annotations mirrored onto the presenter's real screen (desktop app only). */
+export type DesktopAnnotations = {
+  /** I started sharing a whole screen of this size (device pixels): open the overlay on it. */
+  start: (info: { width: number; height: number }) => void;
+  /** Someone drew something (an AnnotationOp, as sent on the call). */
+  op: (op: unknown) => void;
+  /** I stopped sharing: close the overlay. */
+  stop: () => void;
+  /** Overlay page only: receive ops / resets forwarded by the desktop app. */
+  onOp?: (fn: (op: unknown) => void) => () => void;
+  onReset?: (fn: () => void) => () => void;
+};
+
 type DesktopBridge = {
   platform: string;
   /** Bring the app window to the front. */
   focus: () => void;
+  /** Present in desktop builds that can draw annotations over the shared screen. */
+  annotations?: DesktopAnnotations;
 };
 
 declare global {

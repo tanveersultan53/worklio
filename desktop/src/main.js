@@ -26,7 +26,8 @@ const { pathToFileURL } = require("node:url");
 const config = require("./config");
 const { attachContextMenu } = require("./context-menu");
 const { buildMenu } = require("./menu");
-const { installScreenSharePicker } = require("./screen-share");
+const { installAnnotationOverlay } = require("./annotation-overlay");
+const { installScreenSharePicker, lastSharedDisplayId } = require("./screen-share");
 const { normalize, probe, needsSecureContextOverride } = require("./server");
 const { createTray } = require("./tray");
 
@@ -149,6 +150,7 @@ if (!app.requestSingleInstanceLock()) {
     ses.setPermissionCheckHandler((_wc, permission, origin) => isServerUrl(origin) && ALLOWED_PERMISSIONS.has(permission));
     ses.setDevicePermissionHandler(() => false);
     installScreenSharePicker({ session: ses, isTrusted: isServerUrl, getWindow: () => win });
+    installAnnotationOverlay({ getWindow: () => win, serverOrigin, lastSharedDisplayId });
 
     // A plain "Worklio" token so the server and its logs can tell desktop traffic apart.
     ses.setUserAgent(`${ses.getUserAgent()} WorklioDesktop/${app.getVersion()}`);
