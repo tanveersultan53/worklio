@@ -5,6 +5,7 @@ import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { useWorkspace } from "@/components/workspace/provider";
 
 import { CUSTOM_IMAGE_MAX_BYTES, CUSTOM_IMAGE_TYPES, type EffectId, isEffectId } from "./presets";
+import { isStudioLevel, type StudioLevel } from "./studio";
 
 /**
  * Per-user camera-effect preferences.
@@ -16,6 +17,8 @@ import { CUSTOM_IMAGE_MAX_BYTES, CUSTOM_IMAGE_TYPES, type EffectId, isEffectId }
 
 export type EffectsSnapshot = {
   effect: EffectId;
+  /** Studio look: on-device light, noise, colour and clarity enhancement. */
+  studio: StudioLevel;
   /** Flip my own camera preview horizontally (local only; others always see the true image). */
   mirror: boolean;
   /** Object URL of my uploaded background, or null. */
@@ -24,7 +27,7 @@ export type EffectsSnapshot = {
   customLoaded: boolean;
 };
 
-const DEFAULTS: EffectsSnapshot = Object.freeze({ effect: "none", mirror: true, customUrl: null, customLoaded: false });
+const DEFAULTS: EffectsSnapshot = Object.freeze({ effect: "none", studio: "off", mirror: true, customUrl: null, customLoaded: false });
 
 const KEY_PREFIX = "worklio.effects.v1.";
 const DB_NAME = "worklio-effects";
@@ -96,9 +99,10 @@ class EffectsStore {
 
   private readLocal(): Partial<EffectsSnapshot> {
     try {
-      const raw = JSON.parse(localStorage.getItem(this.key) ?? "{}") as { effect?: unknown; mirror?: unknown };
+      const raw = JSON.parse(localStorage.getItem(this.key) ?? "{}") as { effect?: unknown; mirror?: unknown; studio?: unknown };
       return {
         ...(isEffectId(raw.effect) ? { effect: raw.effect } : null),
+        ...(isStudioLevel(raw.studio) ? { studio: raw.studio } : null),
         ...(typeof raw.mirror === "boolean" ? { mirror: raw.mirror } : null),
       };
     } catch {
@@ -108,7 +112,7 @@ class EffectsStore {
 
   private writeLocal() {
     try {
-      localStorage.setItem(this.key, JSON.stringify({ effect: this.snap.effect, mirror: this.snap.mirror }));
+      localStorage.setItem(this.key, JSON.stringify({ effect: this.snap.effect, studio: this.snap.studio, mirror: this.snap.mirror }));
     } catch {
       // storage blocked: keep the choice for this page only
     }
@@ -132,6 +136,12 @@ class EffectsStore {
     if (effect === "custom" && !this.snap.customUrl) return;
     if (effect === this.snap.effect) return;
     this.set({ effect });
+    this.writeLocal();
+  };
+
+  setStudio = (studio: StudioLevel) => {
+    if (studio === this.snap.studio) return;
+    this.set({ studio });
     this.writeLocal();
   };
 
@@ -201,11 +211,12 @@ export function useEffectsPrefs() {
   const snap = useSyncExternalStore(subscribe, getSnapshot, SERVER_STORE.getSnapshot);
   const actions = useMemo(() => {
     if (typeof window === "undefined") {
-      return { setEffect: () => {}, setMirror: () => {}, setCustomImage: async () => null, clearCustomImage: () => {} };
+      return { setEffect: () => {}, setStudio: () => {}, setMirror: () => {}, setCustomImage: async () => null, clearCustomImage: () => {} };
     }
     const s = getEffectsStore(userId);
     return {
       setEffect: s.setEffect,
+      setStudio: s.setStudio,
       setMirror: s.setMirror,
       setCustomImage: s.setCustomImage as (file: File) => Promise<string | null>,
       clearCustomImage: s.clearCustomImage,

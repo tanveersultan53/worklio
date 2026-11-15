@@ -14,6 +14,7 @@ import { toast } from "@/lib/toast";
 
 import { effectDef } from "./presets";
 import { type EffectsSnapshot, getEffectsStore } from "./store";
+import { StudioEnhancer, type StudioLevel } from "./studio";
 
 /**
  * Applies background effects (blur / virtual background) to a LiveKit camera track with
@@ -22,9 +23,12 @@ import { type EffectsSnapshot, getEffectsStore } from "./store";
  */
 
 type Processors = typeof import("@livekit/track-processors");
-type SwitchOptions =
+type BackgroundMode =
   | { mode: "background-blur"; blurRadius: number }
-  | { mode: "virtual-background"; imagePath: string };
+  | { mode: "virtual-background"; imagePath: string }
+  | { mode: "disabled" };
+/** Background effect plus the Studio look, applied together in one processor. */
+type SwitchOptions = BackgroundMode & { studio: StudioLevel };
 
 /** What a track should look like: `key` identifies it, `options` is null for "no effect". */
 export type EffectTarget = { key: string; options: SwitchOptions | null };
@@ -114,16 +118,70 @@ export function preloadBackground(src: string) {
   void rasterized(src).catch(() => {});
 }
 
-/** Resolves preferences to a concrete processor target. */
-export async function resolveTarget(prefs: Pick<EffectsSnapshot, "effect" | "customUrl">): Promise<EffectTarget> {
+/** Whether these preferences need the video pipeline at all (a background effect or the Studio look). */
+export function wantsProcessing(prefs: Pick<EffectsSnapshot, "effect" | "studio">): boolean {
+  return prefs.effect !== "none" || (prefs.studio ?? "off") !== "off";
+}
+
+async function resolveBackground(prefs: Pick<EffectsSnapshot, "effect" | "customUrl">): Promise<{ key: string; mode: BackgroundMode }> {
   if (prefs.effect === "custom") {
-    if (!prefs.customUrl) return NO_EFFECT;
-    return { key: `custom:${prefs.customUrl}`, options: { mode: "virtual-background", imagePath: await rasterized(prefs.customUrl) } };
+    if (!prefs.customUrl) return { key: "none", mode: { mode: "disabled" } };
+    return { key: `custom:${prefs.customUrl}`, mode: { mode: "virtual-background", imagePath: await rasterized(prefs.customUrl) } };
   }
   const def = effectDef(prefs.effect);
-  if (!def || def.kind === "none") return NO_EFFECT;
-  if (def.kind === "blur") return { key: `blur:${def.radius}`, options: { mode: "background-blur", blurRadius: def.radius } };
-  return { key: `img:${def.src}`, options: { mode: "virtual-background", imagePath: await rasterized(def.src) } };
+  if (!def || def.kind === "none") return { key: "none", mode: { mode: "disabled" } };
+  if (def.kind === "blur") return { key: `blur:${def.radius}`, mode: { mode: "background-blur", blurRadius: def.radius } };
+  return { key: `img:${def.src}`, mode: { mode: "virtual-background", imagePath: await rasterized(def.src) } };
+}
+
+/** Resolves preferences to a concrete processor target. */
+export async function resolveTarget(prefs: Pick<EffectsSnapshot, "effect" | "customUrl" | "studio">): Promise<EffectTarget> {
+  const bg = await resolveBackground(prefs);
+  const studio = prefs.studio ?? "off";
+  if (bg.key === "none" && studio === "off") return NO_EFFECT;
+  return { key: `${bg.key}|studio:${studio}`, options: { ...bg.mode, studio } };
+}
+
+/** Options for LiveKit's background transformer from our switch options. */
+function backgroundOptions(o: SwitchOptions) {
+  if (o.mode === "background-blur") return { imagePath: undefined, blurRadius: o.blurRadius, backgroundDisabled: false };
+  if (o.mode === "virtual-background") return { imagePath: o.imagePath, blurRadius: undefined, backgroundDisabled: false };
+  return { imagePath: undefined, blurRadius: undefined, backgroundDisabled: true };
+}
+
+/**
+ * One processor for both: each frame goes through the Studio enhancer (GPU) first, then LiveKit's
+ * background transformer (segmentation + blur / replace, or a pass-through when disabled).
+ */
+function createProcessor(mod: Processors, options: SwitchOptions) {
+  class StudioBackgroundTransformer extends mod.BackgroundTransformer {
+    enhancer = new StudioEnhancer(options.studio);
+
+    async transform(frame: VideoFrame, controller: TransformStreamDefaultController<VideoFrame>) {
+      if (this.enhancer.active && frame instanceof VideoFrame && frame.codedWidth > 0) {
+        const enhanced = this.enhancer.process(frame);
+        if (enhanced) {
+          frame.close();
+          return super.transform(enhanced, controller);
+        }
+      }
+      return super.transform(frame, controller);
+    }
+
+    async destroy(opts?: Parameters<InstanceType<Processors["BackgroundTransformer"]>["destroy"]>[0]) {
+      this.enhancer.destroy();
+      return super.destroy(opts);
+    }
+  }
+
+  class StudioProcessor extends mod.ProcessorWrapper<Record<string, unknown>, StudioBackgroundTransformer> {
+    async switchTo(next: SwitchOptions) {
+      this.transformer.enhancer.setLevel(next.studio);
+      await this.updateTransformerOptions(backgroundOptions(next));
+    }
+  }
+
+  return new StudioProcessor(new StudioBackgroundTransformer(backgroundOptions(options)), PROCESSOR_NAME, { maxFps: 30 });
 }
 
 // --- Applying to a track (serialised per track, idempotent) ---
@@ -152,7 +210,7 @@ async function applyNow(track: LocalVideoTrack, target: EffectTarget) {
   if (track.isMuted) return;
   const mod = await loadProcessors();
   if (!mod.supportsBackgroundProcessors()) throw new Error("Background effects aren't supported in this browser.");
-  const processor = mod.BackgroundProcessor({ ...target.options, maxFps: 30 }, PROCESSOR_NAME);
+  const processor = createProcessor(mod, target.options);
   processorKeys.set(processor, target.key);
   await track.setProcessor(processor, true);
 }
@@ -168,7 +226,7 @@ export function applyEffect(track: LocalVideoTrack, target: EffectTarget): Promi
 /** Resolves `userId`'s preferences and applies them to `track`. */
 export async function applyPreferredEffect(track: LocalVideoTrack, userId: string): Promise<void> {
   const prefs = getEffectsStore(userId).getSnapshot();
-  if (prefs.effect !== "none" && !(await effectsSupported())) return;
+  if (wantsProcessing(prefs) && !(await effectsSupported())) return;
   await applyEffect(track, await resolveTarget(prefs));
 }
 
@@ -193,7 +251,7 @@ function isDeviceError(err: unknown) {
 export async function enableCameraWithEffects(room: Room, opts: VideoCaptureOptions, userId: string | undefined): Promise<void> {
   const lp = room.localParticipant;
   const prefs = userId ? getEffectsStore(userId).getSnapshot() : null;
-  if (!prefs || prefs.effect === "none") {
+  if (!prefs || !wantsProcessing(prefs)) {
     await lp.setCameraEnabled(true, opts);
     return;
   }

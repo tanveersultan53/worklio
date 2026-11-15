@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 import { toast } from "@/lib/toast";
 
-import { applyEffect, effectsSupported, localCameraTrack, resolveTarget } from "./engine";
+import { applyEffect, effectsSupported, localCameraTrack, resolveTarget, wantsProcessing } from "./engine";
 import { getEffectsStore } from "./store";
 
 /**
@@ -24,7 +24,7 @@ export function CameraEffectsSync({ room, userId }: { room: Room | null; userId:
       const track = localCameraTrack(room);
       if (!track || !alive) return;
       const prefs = store.getSnapshot();
-      if (prefs.effect !== "none" && !(await effectsSupported())) return;
+      if (wantsProcessing(prefs) && !(await effectsSupported())) return;
       let key = "none";
       try {
         const target = await resolveTarget(prefs);

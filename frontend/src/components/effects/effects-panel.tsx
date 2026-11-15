@@ -22,6 +22,7 @@ import {
   NONE_EFFECT,
 } from "./presets";
 import { useEffectsPrefs } from "./store";
+import { STUDIO_LEVELS, type StudioLevel } from "./studio";
 
 /** Approximate "person" cut-out used by the live thumbnails (the big preview shows the real result). */
 const PERSON_MASK = "radial-gradient(ellipse 30% 46% at 50% 68%, #000 64%, transparent 100%)";
@@ -83,6 +84,16 @@ function EffectsBody({ room, cameraTrack, active }: { room: Room | null; cameraT
         setPending(null);
         setNotice("That effect couldn't be applied. Try another one, or reload the page.");
       });
+  };
+
+  const chooseStudio = (level: StudioLevel) => {
+    setNotice(null);
+    prefs.setStudio(level);
+    const t = cameraTrack ?? preview.track;
+    if (!t) return;
+    applyPreferredEffect(t, prefs.userId).catch(() =>
+      setNotice("The Studio look couldn't be applied in this browser. Your camera still works without it."),
+    );
   };
 
   const choose = (id: EffectId) => {
@@ -184,6 +195,39 @@ function EffectsBody({ room, cameraTrack, active }: { room: Room | null; cameraT
               className="relative h-5 w-9 shrink-0 rounded-full bg-white/15 transition-colors peer-checked:bg-emerald-500 peer-focus-visible:ring-2 peer-focus-visible:ring-emerald-300/60 after:absolute after:top-0.5 after:left-0.5 after:size-4 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-4 motion-reduce:after:transition-none"
             />
           </label>
+
+          {/* Studio look: on-device light, noise, colour and clarity enhancement. */}
+          <div className="rounded-xl bg-white/[0.04] px-3 py-2.5 ring-1 ring-white/[0.07]">
+            <div className="flex items-center justify-between gap-3">
+              <span className="min-w-0">
+                <span className="flex items-center gap-1.5 text-[13px] font-medium">
+                  <Sparkles className="size-3.5 text-fuchsia-300" aria-hidden />
+                  Studio look
+                </span>
+                <span className="block text-[11.5px] text-white/50">
+                  Brightens low light, reduces grain, balances colour and sharpens detail. Runs on your device.
+                </span>
+              </span>
+            </div>
+            <div role="radiogroup" aria-label="Studio look" className="mt-2 grid grid-cols-3 gap-1 rounded-lg bg-black/30 p-1">
+              {STUDIO_LEVELS.map((l) => (
+                <button
+                  key={l.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={prefs.studio === l.id}
+                  disabled={effectsOff}
+                  onClick={() => chooseStudio(l.id)}
+                  className={cn(
+                    "rounded-md py-1.5 text-[12.5px] font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white/60 disabled:opacity-40",
+                    prefs.studio === l.id ? "bg-white text-zinc-900 shadow-sm" : "text-white/70 hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {effectsOff && (
             <p className="flex gap-2 rounded-xl bg-amber-400/10 px-3 py-2.5 text-[12px] leading-snug text-amber-100 ring-1 ring-amber-300/20">
