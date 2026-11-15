@@ -39,6 +39,8 @@ import {
   Star,
   StarOff,
   Trash2,
+  Smile,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -49,6 +51,7 @@ import { ConfirmDialog } from "@/components/chat/confirm-dialog";
 import { UserAvatar } from "@/components/chat/user-avatar";
 import { HuddleIndicator } from "@/components/huddle";
 import { StatusEmoji } from "@/components/profile/status-emoji";
+import { EmojiPicker } from "@/components/chat/emoji-picker";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -111,6 +114,14 @@ const MENU_POPUP =
   "z-50 max-h-(--available-height) min-w-52 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95";
 
 /** Right-click (or long-press) menu around any sidebar row. */
+
+/** A custom section's leading emoji (Slack shows it as the section icon), and the rest of its name. */
+const SECTION_EMOJI = /^(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic}|\p{Emoji_Modifier})*)\s*(.*)$/u;
+export function splitSectionEmoji(name: string): { emoji: string | null; title: string } {
+  const m = SECTION_EMOJI.exec(name.trim());
+  return m && m[2] ? { emoji: m[1], title: m[2] } : { emoji: null, title: name };
+}
+
 export function RowContextMenu({ menu, children }: { menu: React.ReactNode; children: React.ReactNode }) {
   return (
     <ContextMenu.Root>
@@ -419,7 +430,14 @@ function GroupBlock({
           >
             {collapsed ? <ChevronRight className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
             {group.kind === "starred" && <Star className="size-3.5 shrink-0 fill-current opacity-80" />}
-            <span className="truncate font-medium">{group.title}</span>
+            {group.kind === "custom" && splitSectionEmoji(group.title).emoji && (
+              <span aria-hidden className="shrink-0 text-[15px] leading-none">
+                {splitSectionEmoji(group.title).emoji}
+              </span>
+            )}
+            <span className="truncate font-medium">
+              {group.kind === "custom" ? splitSectionEmoji(group.title).title : group.title}
+            </span>
           </button>
         )}
         {handle && !renaming && (
@@ -509,7 +527,25 @@ function SectionMenu({ group, onInvite }: { group: SidebarGroup; onInvite: () =>
     const ids = sidebar.sections.map((s) => s.id);
     reorderSections(arrayMove(ids, idx, idx + dir));
   };
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const parts = group.section ? splitSectionEmoji(group.section.name) : null;
+  const setEmoji = (emoji: string | null) => {
+    if (!group.section || !parts) return;
+    void updateSection(group.section.id, { name: emoji ? `${emoji} ${parts.title}` : parts.title });
+  };
   return (
+    <>
+    <Dialog open={emojiOpen} onOpenChange={setEmojiOpen}>
+      <DialogContent className="w-auto p-0 sm:max-w-fit" showCloseButton={false}>
+        <DialogTitle className="sr-only">Choose an emoji for {parts?.title ?? group.title}</DialogTitle>
+        <EmojiPicker
+          onPick={(e) => {
+            setEmoji(e);
+            setEmojiOpen(false);
+          }}
+        />
+      </DialogContent>
+    </Dialog>
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={`${group.title} options`}
@@ -523,6 +559,14 @@ function SectionMenu({ group, onInvite }: { group: SidebarGroup; onInvite: () =>
             <DropdownMenuItem onClick={() => actions.renameSection(group.key)}>
               <Pencil className="size-4" /> Rename section
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setEmojiOpen(true)}>
+              <Smile className="size-4" /> {parts?.emoji ? "Change emoji" : "Add an emoji"}
+            </DropdownMenuItem>
+            {parts?.emoji && (
+              <DropdownMenuItem onClick={() => setEmoji(null)}>
+                <X className="size-4" /> Remove emoji
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem disabled={idx <= 0} onClick={() => move(-1)}>
               <ArrowUp className="size-4" /> Move up
             </DropdownMenuItem>
@@ -562,6 +606,7 @@ function SectionMenu({ group, onInvite }: { group: SidebarGroup; onInvite: () =>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 }
 

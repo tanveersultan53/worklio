@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   Archive,
   Bookmark,
+  Check,
   ChevronDown,
   ChevronLeft,
   FileText,
@@ -15,6 +16,7 @@ import {
   Pencil,
   PenLine,
   Pin,
+  Plus,
   UserPlus,
 } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
@@ -45,10 +47,20 @@ import {
 } from "@/components/workspace/channel-header-actions";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
 import { WhiteboardTab } from "@/components/whiteboard";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useMessageJump } from "@/hooks/use-message-jump";
 import type { SummaryRange } from "@/lib/ai";
 import { api, type Message } from "@/lib/api";
 import { applyMessageEvent, upsert } from "@/lib/messages";
+import { setTabHidden, useHiddenTabs } from "@/lib/tab-prefs";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 50;
@@ -117,6 +129,8 @@ function ChannelPane({
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [thread, setThread] = useState<Message | null>(null);
   const [tab, setTab] = useState<Tab>(initialTab);
+  // Tabs this person hid in this channel (the "+" at the end of the tab row brings them back).
+  const hiddenTabs = useHiddenTabs(channelId);
   const [details, setDetails] = useState<DetailsTab | null>(null);
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const [pinsOpen, setPinsOpen] = useState(false);
@@ -292,6 +306,12 @@ function ChannelPane({
   const dmPeer = isDM ? (others[0] ?? ws.me?.id) : undefined;
   const isGroupDM = isDM && others.length >= 2;
   const visibleTabs = TABS.filter((t) => !(isDM && t.channelsOnly && !(isGroupDM && t.groupDMs)));
+  const shownTabs = visibleTabs.filter((t) => t.key === "messages" || !hiddenTabs.includes(t.key));
+  const toggleTab = (key: Tab, hide: boolean) => {
+    setTabHidden(channelId, key, hide);
+    if (hide && tab === key) setTab("messages");
+    if (!hide) setTab(key);
+  };
   const showTab = (key: Tab) => visibleTabs.some((t) => t.key === key);
 
   return (
@@ -376,7 +396,7 @@ function ChannelPane({
             aria-label="Conversation views"
             className="flex gap-1 overflow-x-auto px-3 text-[13px] [scrollbar-width:none] sm:px-4"
           >
-            {visibleTabs.map((t) => (
+            {shownTabs.map((t) => (
               <button
                 key={t.key}
                 role="tab"
@@ -421,6 +441,38 @@ function ChannelPane({
               >
                 <Bookmark className={cn("size-3.5", bookmarksShown && "fill-current")} aria-hidden /> Bookmarks
               </button>
+            )}
+            {channel && (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  aria-label="Add a tab"
+                  className="-mb-px flex shrink-0 items-center rounded-md px-2 pt-1 pb-2.5 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 md:pt-0 md:pb-2"
+                >
+                  <Plus className="size-4" aria-hidden />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>Tabs in this conversation</DropdownMenuLabel>
+                    {visibleTabs
+                      .filter((t) => t.key !== "messages")
+                      .map((t) => {
+                        const on = !hiddenTabs.includes(t.key);
+                        return (
+                          <DropdownMenuItem key={t.key} onClick={() => toggleTab(t.key, on)}>
+                            <t.icon className="size-4" aria-hidden />
+                            <span className="flex-1">{t.label}</span>
+                            {on && <Check className="size-4" aria-hidden />}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setBookmarksShown(true)}>
+                    <Bookmark className="size-4" aria-hidden />
+                    Add a bookmark
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </nav>
         </header>

@@ -145,6 +145,13 @@ const json = (method: string, body?: unknown): RequestInit => ({
   ...(body === undefined ? {} : { body: JSON.stringify(body) }),
 });
 
+/** Fired after scheduling, cancelling or sending a scheduled message (the sidebar count listens). */
+export const SCHEDULED_CHANGED = "worklio:scheduled-changed";
+function scheduledChanged<T>(v: T): T {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(SCHEDULED_CHANGED));
+  return v;
+}
+
 export const messaging = {
   // Pins
   pin: (messageId: string) => api<Message | undefined>(`/messages/${messageId}/pin`, json("POST")),
@@ -170,12 +177,12 @@ export const messaging = {
   schedule: (
     channelId: string,
     data: { body: string; parent_id?: string | null; attachment_ids?: string[]; send_at: string },
-  ) => api<ScheduledMessage>(`/channels/${channelId}/scheduled`, json("POST", data)),
+  ) => api<ScheduledMessage>(`/channels/${channelId}/scheduled`, json("POST", data)).then(scheduledChanged),
   scheduledList: (workspaceId: string) => api<ScheduledMessage[]>(`/workspaces/${workspaceId}/scheduled`),
   updateScheduled: (id: string, data: { body?: string; send_at?: string }) =>
     api<ScheduledMessage>(`/scheduled/${id}`, json("PATCH", data)),
-  cancelScheduled: (id: string) => api<void>(`/scheduled/${id}`, json("DELETE")),
-  sendScheduledNow: (id: string) => api<unknown>(`/scheduled/${id}/send-now`, json("POST")),
+  cancelScheduled: (id: string) => api<void>(`/scheduled/${id}`, json("DELETE")).then(scheduledChanged),
+  sendScheduledNow: (id: string) => api<unknown>(`/scheduled/${id}/send-now`, json("POST")).then(scheduledChanged),
 
   // Polls
   createPoll: (

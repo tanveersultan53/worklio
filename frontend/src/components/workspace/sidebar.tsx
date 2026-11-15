@@ -18,6 +18,8 @@ import {
   UserPlus,
   X,
   SquarePen,
+  PenLine,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -64,6 +66,7 @@ import {
   useWorkspaceUnreads,
   type WithDnd,
 } from "@/lib/sidebar";
+import { messaging, SCHEDULED_CHANGED } from "@/lib/messaging";
 import { cn } from "@/lib/utils";
 
 import { BrowseChannelsDialog, NewChannelDialog, NewDMDialog } from "./dialogs";
@@ -429,6 +432,31 @@ export function Sidebar({ view }: { view: SidebarView }) {
 
 /* ------------------------------------------------------------ nav items */
 
+/** Scheduled messages waiting to go out (refreshed on changes, focus and every minute). */
+function useScheduledCount(workspaceId: string): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!workspaceId) return;
+    let live = true;
+    const load = () =>
+      messaging
+        .scheduledList(workspaceId)
+        .then((list) => live && setCount(list.length))
+        .catch(() => {});
+    load();
+    const t = window.setInterval(load, 60_000);
+    window.addEventListener("focus", load);
+    window.addEventListener(SCHEDULED_CHANGED, load);
+    return () => {
+      live = false;
+      window.clearInterval(t);
+      window.removeEventListener("focus", load);
+      window.removeEventListener(SCHEDULED_CHANGED, load);
+    };
+  }, [workspaceId]);
+  return count;
+}
+
 function NavItems({ onCustomize }: { onCustomize: () => void }) {
   const ws = useWorkspace();
   const { prefs, update } = useAppearance();
@@ -438,6 +466,7 @@ function NavItems({ onCustomize }: { onCustomize: () => void }) {
   const sidebar = useSidebarState();
   const draftList = useDraftList();
   const laterLive = useLaterCount(ws.workspaceId);
+  const scheduledCount = useScheduledCount(ws.workspaceId);
 
   const hidden = new Set(prefs.sidebar_hidden_items ?? []);
   const shown = NAV_ITEMS.filter((i) => !hidden.has(i.id));
@@ -498,7 +527,23 @@ function NavItems({ onCustomize }: { onCustomize: () => void }) {
               >
                 <item.icon className="size-4 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                {n > 0 &&
+                {item.id === "drafts" ? (
+                  // Like Slack: ✎ unsent drafts · ⏱ scheduled messages.
+                  <span className={cn("flex items-center gap-2 text-xs tabular-nums", active ? "opacity-90" : "opacity-70")}>
+                    {n > 0 && (
+                      <span className="flex items-center gap-0.5" title={`${n} unsent ${n === 1 ? "draft" : "drafts"}`}>
+                        <PenLine className="size-3" aria-hidden />
+                        {n > 99 ? "99+" : n}
+                      </span>
+                    )}
+                    {scheduledCount > 0 && (
+                      <span className="flex items-center gap-0.5" title={`${scheduledCount} scheduled`}>
+                        <Clock className="size-3" aria-hidden />
+                        {scheduledCount > 99 ? "99+" : scheduledCount}
+                      </span>
+                    )}
+                  </span>
+                ) : n > 0 &&
                   (c?.strong ? (
                     <span className="rounded-full bg-badge px-2 text-xs leading-5 font-bold text-badge-foreground">
                       {n > 99 ? "99+" : n}
