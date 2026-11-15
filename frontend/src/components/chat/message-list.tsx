@@ -3,6 +3,7 @@
 import { ArrowDown } from "lucide-react";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { isFinishedCallMessage } from "@/components/calls";
 import { ReadReceipt } from "@/components/messaging/read-receipts";
 import { useWorkspace } from "@/components/workspace/provider";
 import type { Message } from "@/lib/api";
@@ -205,15 +206,17 @@ export function MessageList({
             const prev = messages[i - 1];
             const newDay = !prev || dayLabel(prev.created_at) !== dayLabel(m.created_at);
             const isFirstUnread = m.id === firstUnreadId;
+            // A finished call is a one-line event: never gets its own name/avatar header.
             const compact =
-              !!prev &&
+              (isFinishedCallMessage(m) && !isFirstUnread) ||
+              (!!prev &&
               !newDay &&
               !isFirstUnread &&
               // System messages (call cards, call notes) always stand on their own.
               m.kind !== "system" &&
               prev.kind !== "system" &&
               prev.author_id === m.author_id &&
-              new Date(m.created_at).getTime() - new Date(prev.created_at).getTime() < GROUP_WINDOW_MS;
+              new Date(m.created_at).getTime() - new Date(prev.created_at).getTime() < GROUP_WINDOW_MS);
             return (
               <Fragment key={m.id}>
                 {newDay && (

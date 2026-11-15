@@ -36,6 +36,15 @@ export function isCallSystemMessage(m: AnyMessage): boolean {
   return isCallMessageMeta(meta) || isCallNotesMeta(meta);
 }
 
+/**
+ * A call that's over (ended, missed, declined, cancelled). These render as one quiet line with no
+ * name/avatar header, so a DM with a few calls doesn't turn into a wall of cards.
+ */
+export function isFinishedCallMessage(m: AnyMessage): boolean {
+  const meta = metaOf(m);
+  return isCallMessageMeta(meta) && meta.status !== "ringing" && meta.status !== "active";
+}
+
 /** Renders the right card for a call system message, or null for anything else. */
 export function CallSystemMessage({ message, className }: { message: AnyMessage; className?: string }) {
   const meta = metaOf(message);
@@ -186,7 +195,7 @@ function CallCard({ meta, channelId, className }: { meta: CallMessageMeta; chann
         aria-label={`${label}${isVideo ? " with video" : ""}`}
         title={activeChannelId ? "Leave your current call first" : undefined}
         className={cn(
-          "inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none disabled:opacity-50",
+          "inline-flex h-6 items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-colors focus-visible:ring-3 focus-visible:outline-none disabled:opacity-50",
           callBack
             ? "bg-emerald-600/10 text-emerald-700 hover:bg-emerald-600/15 focus-visible:ring-emerald-500/30 dark:bg-emerald-400/10 dark:text-emerald-300 dark:hover:bg-emerald-400/15"
             : "text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring/50",
@@ -199,8 +208,36 @@ function CallCard({ meta, channelId, className }: { meta: CallMessageMeta; chann
         ) : (
           <Phone className="size-3.5" aria-hidden />
         )}
-        <span className={cn(!callBack && "hidden min-[420px]:inline")}>{label}</span>
+        <span>{label}</span>
       </button>
+    );
+  }
+
+  if (!isLive) {
+    // Finished: one line. "Call back" stays visible for a call I missed; "Call again" on hover.
+    const callBackVisible = missedForMe;
+    return (
+      <div className={cn("group/call flex min-h-7 max-w-full items-center gap-2 text-[13px] text-muted-foreground", className)}>
+        <Icon
+          aria-hidden
+          className={cn("size-4 shrink-0", tone === "missed" ? "text-red-600 dark:text-red-400" : "text-muted-foreground/80")}
+        />
+        <span className={cn("min-w-0 truncate", tone === "missed" ? "font-medium text-red-600 dark:text-red-400" : "text-foreground/80")}>
+          {title}
+        </span>
+        {details.length > 0 && <span className="shrink-0 tabular-nums">· {details.filter(Boolean).join(" · ")}</span>}
+        {showStack && <CallAvatarStack ids={people} size="sm" max={4} ringClassName="ring-background" />}
+        {action && (
+          <div
+            className={cn(
+              "shrink-0 transition-opacity",
+              !callBackVisible && "opacity-0 group-hover/call:opacity-100 focus-within:opacity-100 [@media(hover:none)]:opacity-100",
+            )}
+          >
+            {action}
+          </div>
+        )}
+      </div>
     );
   }
 
