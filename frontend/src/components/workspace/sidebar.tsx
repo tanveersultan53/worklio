@@ -17,6 +17,7 @@ import {
   SlidersHorizontal,
   UserPlus,
   X,
+  SquarePen,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -359,6 +360,23 @@ export function Sidebar({ view }: { view: SidebarView }) {
         </DropdownMenu>
         {/* Header actions: one compact cluster so the workspace name keeps the room. */}
         <div role="group" aria-label="Quick actions" className="flex shrink-0 items-center gap-px">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={() => setDialog("dm")}
+                  aria-label="New message"
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full text-side-foreground outline-none hover:bg-side-hover hover:text-side-strong focus-visible:ring-2 focus-visible:ring-ring/60 md:size-7"
+                />
+              }
+            >
+              <SquarePen className="size-[15px]" aria-hidden />
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={6}>
+              New message
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger
               render={
