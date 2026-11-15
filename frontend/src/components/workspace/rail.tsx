@@ -1,8 +1,32 @@
 "use client";
 
-import { AtSign, Check, Home, LayoutGrid, LogOut, MessagesSquare, Palette, PanelLeft, Plus, UserRound } from "lucide-react";
+import {
+  AtSign,
+  Bookmark,
+  Building2,
+  CalendarDays,
+  Check,
+  FileText,
+  Hash,
+  Headphones,
+  Home,
+  Layers,
+  LayoutGrid,
+  LogOut,
+  MessageSquareText,
+  MessagesSquare,
+  MoreHorizontal,
+  Palette,
+  PanelLeft,
+  Plus,
+  Puzzle,
+  Send,
+  SquarePen,
+  UserRound,
+  Users,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useAppearance } from "@/components/appearance-provider";
 
@@ -20,6 +44,9 @@ import { signOut } from "@/lib/api";
 import { refreshWorkspaceUnreads, switcherVisible, toggledSwitcher, useNavBadges, useWorkspaceUnreads } from "@/lib/sidebar";
 import { cn } from "@/lib/utils";
 
+import { ScheduleMeetingDialog } from "@/components/meetings/schedule-dialog";
+
+import { NewChannelDialog, NewDMDialog } from "./dialogs";
 import { useWorkspace } from "./provider";
 
 export type SidebarView = "home" | "dms";
@@ -32,6 +59,11 @@ export function Rail({ view, onView }: { view: SidebarView; onView: (v: SidebarV
   const badges = useNavBadges();
   const unreads = useWorkspaceUnreads();
   const onActivity = pathname.endsWith("/activity");
+  const onFiles = pathname.endsWith("/files");
+  const onLater = pathname.endsWith("/later");
+  // Home and DMs are the sidebar views; they light up only when no rail page is open.
+  const onRailPage = onActivity || onFiles || onLater;
+  const [create, setCreate] = useState<"dm" | "channel" | "huddle" | null>(null);
   const showSwitcher = switcherVisible(prefs.show_workspace_switcher, ws.workspaces.length);
   const otherIds = ws.workspaces.filter((w) => w.id !== ws.workspaceId).map((w) => w.id).join(",");
 
@@ -56,21 +88,21 @@ export function Rail({ view, onView }: { view: SidebarView; onView: (v: SidebarV
       key: "home",
       label: "Home",
       icon: Home,
-      active: !onActivity && view === "home",
+      active: !onRailPage && view === "home",
       onClick: () => {
         onView("home");
-        if (onActivity) router.push(`/w/${ws.workspaceId}`);
+        if (onRailPage) router.push(`/w/${ws.workspaceId}`);
       },
     },
     {
       key: "dms",
       label: "DMs",
       icon: MessagesSquare,
-      active: !onActivity && view === "dms",
+      active: !onRailPage && view === "dms",
       badge: dmUnread,
       onClick: () => {
         onView("dms");
-        if (onActivity) router.push(`/w/${ws.workspaceId}`);
+        if (onRailPage) router.push(`/w/${ws.workspaceId}`);
       },
     },
     {
@@ -81,6 +113,31 @@ export function Rail({ view, onView }: { view: SidebarView; onView: (v: SidebarV
       badge: badges.activity,
       onClick: () => go(`/w/${ws.workspaceId}/activity`),
     },
+    {
+      key: "files",
+      label: "Files",
+      icon: Layers,
+      active: onFiles,
+      badge: 0,
+      onClick: () => go(`/w/${ws.workspaceId}/files`),
+    },
+    {
+      key: "later",
+      label: "Later",
+      icon: Bookmark,
+      active: onLater,
+      badge: badges.later,
+      onClick: () => go(`/w/${ws.workspaceId}/later`),
+    },
+  ];
+  const more = [
+    { label: "Threads", icon: MessageSquareText, href: "threads" },
+    { label: "Huddles", icon: Headphones, href: "huddles" },
+    { label: "Calendar", icon: CalendarDays, href: "calendar" },
+    { label: "Canvases", icon: FileText, href: "canvas" },
+    { label: "Directory", icon: Users, href: "directory" },
+    { label: "Drafts & sent", icon: Send, href: "drafts" },
+    ...(ws.isAdmin ? [{ label: "Apps & integrations", icon: Puzzle, href: "settings?tab=apps" }] : []),
   ];
 
   return (
@@ -152,19 +209,55 @@ export function Rail({ view, onView }: { view: SidebarView; onView: (v: SidebarV
             {n.label}
           </button>
         ))}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="group flex flex-col items-center gap-0.5 text-[11px] font-bold outline-none">
+            <span className="relative flex size-9 items-center justify-center rounded-lg transition group-hover:bg-chrome-hover group-focus-visible:ring-2 group-focus-visible:ring-white/60 group-data-popup-open:bg-chrome-hover">
+              <MoreHorizontal className="size-[18px]" aria-hidden />
+            </span>
+            More
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="right" align="start" className="w-56">
+            {more.map((m) => (
+              <DropdownMenuItem key={m.href} onClick={() => go(`/w/${ws.workspaceId}/${m.href}`)}>
+                <m.icon className="size-4" aria-hidden />
+                {m.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="mt-auto flex shrink-0 flex-col items-center gap-3">
-        {showSwitcher && (
-        <button
-          onClick={() => go("/new")}
-          aria-label="Create a new workspace"
-          title="Create a new workspace"
-          className="flex size-9 items-center justify-center rounded-full bg-chrome-hover hover:bg-white/20"
-        >
-          <Plus className="size-5" />
-        </button>
-        )}
+        {/* Like Slack: one "+" to create anything. */}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label="Create"
+            className="flex size-9 items-center justify-center rounded-full bg-chrome-hover outline-none hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/60 data-popup-open:bg-white/20"
+          >
+            <Plus className="size-5 transition-transform in-data-popup-open:rotate-45 motion-reduce:transition-none" aria-hidden />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="right" align="end" className="w-56">
+            <DropdownMenuItem onClick={() => setCreate("dm")}>
+              <SquarePen className="size-4" aria-hidden /> New message
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setCreate("channel")}>
+              <Hash className="size-4" aria-hidden /> Create a channel
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setCreate("huddle")}>
+              <CalendarDays className="size-4" aria-hidden /> Schedule a huddle
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => go(`/w/${ws.workspaceId}/canvas`)}>
+              <FileText className="size-4" aria-hidden /> New canvas
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => go("/new")}>
+              <Building2 className="size-4" aria-hidden /> Create a workspace
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <NewDMDialog open={create === "dm"} onOpenChange={(o) => !o && setCreate(null)} />
+        <NewChannelDialog open={create === "channel"} onOpenChange={(o) => !o && setCreate(null)} />
+        <ScheduleMeetingDialog open={create === "huddle"} onOpenChange={(o) => !o && setCreate(null)} />
         {ws.me && (
           <DropdownMenu>
             <DropdownMenuTrigger aria-label="Your profile">
@@ -240,7 +333,8 @@ function CompactSwitcher({
   go: (href: string) => void;
   onShowSwitcher: () => void;
 }) {
-  const othersUnread = workspaces.some((w) => w.id !== current.id && (unreads[w.id]?.count ?? 0) > 0);
+  const othersCount = workspaces.reduce((n, w) => n + (w.id === current.id ? 0 : (unreads[w.id]?.count ?? 0)), 0);
+  const othersUnread = othersCount > 0;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -253,7 +347,10 @@ function CompactSwitcher({
       >
         <WorkspaceGlyph w={current} className="size-full text-sm" />
         {othersUnread && (
-          <span aria-hidden className="absolute -top-1 -right-1 size-2.5 rounded-full bg-badge ring-2 ring-chrome" />
+          // Like Slack: how many unread messages wait in your other workspaces.
+          <span aria-hidden className="absolute -top-1.5 -left-1.5 min-w-4 rounded-full bg-badge px-1 text-center text-[10px] leading-4 font-bold text-badge-foreground ring-2 ring-chrome">
+            {othersCount > 99 ? "99+" : othersCount}
+          </span>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent side="right" align="start" sideOffset={10} className="w-64">
