@@ -1,6 +1,7 @@
 "use client";
 
-import { Archive, ChevronDown, FileText, Hash, KanbanSquare, Lock, MessageSquare, NotebookPen, Pencil, PenLine, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { Archive, ChevronDown, ChevronLeft, FileText, Hash, KanbanSquare, Lock, MessageSquare, NotebookPen, Pencil, PenLine, UserPlus } from "lucide-react";
 import { useParams, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -275,6 +276,13 @@ function ChannelPane({
       <section className="flex min-w-0 flex-1 flex-col">
         <header className="shrink-0 border-b">
           <div className="flex h-[52px] items-center gap-2 px-3 sm:px-4">
+            <Link
+              href={`/w/${ws.workspaceId}`}
+              aria-label="Back to channels and messages"
+              className="-ml-1.5 flex size-9 shrink-0 items-center justify-center rounded-md hover:bg-muted md:hidden"
+            >
+              <ChevronLeft className="size-5" aria-hidden />
+            </Link>
             {isDM ? (
               dmPeer && (
                 // The popover trigger is an inline button; this grid cell gives it a width to truncate in.
@@ -309,32 +317,33 @@ function ChannelPane({
               <span className="hidden min-w-0 flex-1 truncate text-[13px] text-muted-foreground lg:block">{channel.topic}</span>
             )}
             <div className="ml-auto" />
+            {/* Phones: Summarize and pins live in the channel menu's space; keep the header to name + call. */}
             {channel && (
-              <SummarizeMenu
-                active={!!summary && !ws.searchQuery}
-                onPick={(r) => {
-                  ws.setSearchQuery(null);
-                  setPinsOpen(false);
-                  setSummary(r);
-                }}
-              />
-            )}
-            {channel && (
-              <PinsButton
-                count={pins.pins?.length ?? 0}
-                active={pinsOpen && !ws.searchQuery}
-                onClick={() => {
-                  ws.setSearchQuery(null);
-                  setSummary(null);
-                  setPinsOpen((o) => !o);
-                }}
-              />
+              <div className="hidden sm:contents">
+                <SummarizeMenu
+                  active={!!summary && !ws.searchQuery}
+                  onPick={(r) => {
+                    ws.setSearchQuery(null);
+                    setPinsOpen(false);
+                    setSummary(r);
+                  }}
+                />
+                <PinsButton
+                  count={pins.pins?.length ?? 0}
+                  active={pinsOpen && !ws.searchQuery}
+                  onClick={() => {
+                    ws.setSearchQuery(null);
+                    setSummary(null);
+                    setPinsOpen((o) => !o);
+                  }}
+                />
+              </div>
             )}
             {channel && <CallButtons channelId={channel.id} isDM={channel.kind === "dm"} className="shrink-0" />}
             {channel && !isDM && (
               <button
                 onClick={() => setDetails("members")}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg border py-0.5 pr-2 pl-1 hover:bg-muted"
+                className="hidden shrink-0 items-center gap-1.5 rounded-lg border py-0.5 pr-2 pl-1 hover:bg-muted sm:flex"
                 title="View members"
               >
                 <span className="flex -space-x-1.5">

@@ -10,6 +10,7 @@ import { useNow } from "@/components/profile/profile-utils";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState, ErrorBlock, LoadingList, ViewHeader, ViewPage, ViewTabs } from "@/components/views/view-shell";
+import { useIsMobile } from "@/lib/use-is-mobile";
 import { useWorkspace, useWorkspaceEvents } from "@/components/workspace/provider";
 import {
   addDays,
@@ -73,7 +74,10 @@ function useMeetings(workspaceId: string, from: Date, to: Date) {
 
 export function CalendarView() {
   const { workspaceId } = useWorkspace();
-  const [tab, setTab] = useState<Tab>("week");
+  // Phones open on the list; a 7-column week is unreadable at that width.
+  const mobile = useIsMobile();
+  const [picked, setTab] = useState<Tab | null>(null);
+  const tab: Tab = picked ?? (mobile ? "upcoming" : "week");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
   const [schedule, setSchedule] = useState<{ open: boolean; start?: Date }>({ open: false });
   const [opened, setOpened] = useState<Meeting | null>(null);

@@ -8,6 +8,7 @@ import { SearchPanel } from "@/components/chat/search-panel";
 import { Button } from "@/components/ui/button";
 import { BrowseChannelsDialog, NewChannelDialog, NewDMDialog } from "@/components/workspace/dialogs";
 import { useWorkspace } from "@/components/workspace/provider";
+import { useIsMobile } from "@/lib/use-is-mobile";
 
 type DialogName = "browse" | "channel" | "dm" | null;
 
@@ -19,7 +20,11 @@ export function WorkspaceIndex() {
   const [dialog, setDialog] = useState<DialogName>(null);
   const close = (open: boolean) => !open && setDialog(null);
 
-  const target = channels.find((c) => c.name === "general" && c.is_member) ?? channels.find((c) => c.is_member);
+  // Phones show the channel list here (see Shell); only bigger screens jump into #general.
+  const mobile = useIsMobile();
+  const target = mobile
+    ? undefined
+    : (channels.find((c) => c.name === "general" && c.is_member) ?? channels.find((c) => c.is_member));
   useEffect(() => {
     if (target) router.replace(`/w/${workspaceId}/c/${target.id}`);
   }, [target, workspaceId, router]);
