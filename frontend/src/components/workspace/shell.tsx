@@ -14,6 +14,7 @@ import { ProfileDialog } from "@/components/workspace/profile-dialog";
 import { sidebarFlatOrder, toggledSwitcher } from "@/lib/sidebar";
 import { cn } from "@/lib/utils";
 
+import { AutoTooltips } from "@/components/ui/auto-tooltips";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 import { useWorkspace, WorkspaceProvider } from "./provider";
@@ -188,6 +189,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <HuddleBar />
       <AskWorklioPanel />
       <Toaster />
+      <AutoTooltips />
     </div>
   );
 }
