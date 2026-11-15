@@ -20,6 +20,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { AskWorklioButton } from "@/components/ai/ask-worklio";
+import { useAppearance } from "@/components/appearance-provider";
 import { UserAvatar } from "@/components/chat/user-avatar";
 import { setPreferencesSection } from "@/components/preferences/preferences-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -33,10 +34,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { recordRecent, recordVisit, travel, useNavHistory, useRecentConversations } from "@/lib/nav-history";
+import { switcherVisible, toggledSwitcher } from "@/lib/sidebar";
 import { cn } from "@/lib/utils";
 
 import { useWorkspace } from "./provider";
-import { setSidebarHidden, useSidebarHidden } from "./sidebar";
 
 const REPO = "https://github.com/tanveersultan53/worklio";
 const chromeBtn =
@@ -46,7 +47,8 @@ export function TopBar() {
   const ws = useWorkspace();
   const router = useRouter();
   const pathname = usePathname();
-  const hidden = useSidebarHidden();
+  const { prefs, update } = useAppearance();
+  const switcherShown = switcherVisible(prefs.show_workspace_switcher, ws.workspaces.length);
   const { canBack, canForward } = useNavHistory();
 
   // Feed ← → and 🕘 with every page change.
@@ -71,18 +73,17 @@ export function TopBar() {
         <Menu className="size-5" />
       </button>
 
-      {/* Desktop, like Slack: sidebar toggle over the rail, then back / forward / history before search. */}
+      {/* Desktop, like Slack: the workspace switcher toggle over the rail, then back / forward / history.
+          It only shows or hides the list of workspaces; the rail and channel list stay (⌘. hides those). */}
       <div className="hidden w-[62px] shrink-0 justify-center md:flex">
         <button
           type="button"
           onClick={() =>
-            setSidebarHidden((h) => {
-              ws.setFocusMode(!h);
-              return !h;
-            })
+            update({ show_workspace_switcher: toggledSwitcher(prefs.show_workspace_switcher, ws.workspaces.length) })
           }
-          aria-label={hidden ? "Show sidebar" : "Hide sidebar"}
-          aria-keyshortcuts="Meta+."
+          aria-label={switcherShown ? "Hide workspace switcher" : "Show workspace switcher"}
+          aria-pressed={switcherShown}
+          aria-keyshortcuts="Meta+Shift+S"
           className={chromeBtn}
         >
           <PanelLeft className="size-4" aria-hidden />
