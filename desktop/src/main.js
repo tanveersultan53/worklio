@@ -35,6 +35,7 @@ const UI_SCHEME = "worklio-app";
 const UI_ROOT = path.join(__dirname, "ui");
 const SETUP_URL = `${UI_SCHEME}://ui/setup.html`;
 const ICON = path.join(__dirname, "assets", "icon.png");
+const ASSETS = path.join(__dirname, "assets");
 
 /** Permissions the Worklio page may have. Everything else (geolocation, MIDI, USB…) is refused. */
 const ALLOWED_PERMISSIONS = new Set([
@@ -125,10 +126,12 @@ if (!app.requestSingleInstanceLock()) {
       return net.fetch(pathToFileURL(file).toString());
     });
 
+    // Packaged builds get the .icns; from source, show the Worklio icon instead of Electron's.
+    if (process.platform === "darwin" && !app.isPackaged) app.dock?.setIcon(path.join(ASSETS, "icon-mac.png"));
     lockDownSession();
     registerIpc();
     buildMenu({ showSetup, getWindow: () => win });
-    if (process.platform !== "darwin") tray = createTray({ icon: ICON, show: showWindow, quit: () => app.quit() });
+    if (process.platform !== "darwin") tray = createTray({ assets: ASSETS, show: showWindow, quit: () => app.quit() });
     createWindow();
   });
 

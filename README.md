@@ -123,7 +123,7 @@ Roles (owner, admin, member, guest), permissions enforced on the server, invite 
 |---|---|
 | ![Permissions](docs/screenshots/settings-permissions.png) | ![Members](docs/screenshots/settings-members.png) |
 
-**[See all 46 screens with descriptions →](docs/SCREENSHOTS.md)**
+**[See all 47 screens with descriptions →](docs/SCREENSHOTS.md)**
 
 ## Try it
 
@@ -151,6 +151,8 @@ python3 scripts/seed_demo.py /tmp/worklio-demo.json   # the JSON file contains t
 ```
 
 ### Desktop app
+
+[![The Worklio desktop app on macOS, showing the #design channel](docs/screenshots/desktop-app.png)](docs/screenshots/desktop-app.png)
 
 Worklio has a desktop app for macOS, Windows and Linux in [`desktop/`](desktop/). It opens your server in its own window with a dock or taskbar unread badge, notifications while you're in another app, and a screen-share picker. On first launch it asks for your server's address. To try it against a local server:
 

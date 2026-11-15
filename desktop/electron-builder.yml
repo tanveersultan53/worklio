@@ -12,6 +12,7 @@ files:
   - package.json
 
 mac:
+  icon: build/icon.icns
   category: public.app-category.business
   target:
     - target: dmg
@@ -26,6 +27,7 @@ mac:
     NSCameraUsageDescription: Worklio uses your camera for video huddles.
 
 win:
+  icon: build/icon.ico
   target:
     - target: nsis
       arch: [x64, arm64]
@@ -36,6 +38,7 @@ nsis:
   shortcutName: Worklio
 
 linux:
+  icon: build/icons
   category: Network;Chat;InstantMessaging
   synopsis: Open-source team chat
   maintainer: Worklio contributors <noreply@worklio.app>
