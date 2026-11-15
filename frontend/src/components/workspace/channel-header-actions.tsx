@@ -5,6 +5,7 @@ import { Bell, BellOff, Check, Link2, MoreVertical, Puzzle, Search, Settings, St
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -93,6 +94,8 @@ export function ChannelBell({ channel, label }: { channel: Channel; label: strin
         {quiet ? <BellOff className="size-4" aria-hidden /> : <Bell className="size-4" aria-hidden />}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
+        {/* A menu label must sit inside a group, or the menu throws when it opens. */}
+        <DropdownMenuGroup>
         <DropdownMenuLabel>Notify me about</DropdownMenuLabel>
         {LEVELS.map((l) => (
           <DropdownMenuItem
@@ -108,6 +111,7 @@ export function ChannelBell({ channel, label }: { channel: Channel; label: strin
             </span>
           </DropdownMenuItem>
         ))}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void save(channel.id, { muted: !pref.muted }, pref.muted ? `Unmuted ${label}` : `Muted ${label}`)}
