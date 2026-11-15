@@ -195,8 +195,9 @@ export function relativeStart(m: Pick<Meeting, "starts_at">, now = Date.now()): 
   if (mins <= 0) return "now";
   if (mins < 60) return `in ${mins} min`;
   const h = Math.round(mins / 60);
-  if (h < 24) return `in ${h} h`;
-  return `in ${Math.round(h / 24)} d`;
+  if (h < 24) return `in ${h} ${h === 1 ? "hour" : "hours"}`;
+  const d = Math.round(h / 24);
+  return `in ${d} ${d === 1 ? "day" : "days"}`;
 }
 
 /** Monday 00:00 of the week containing `d` (local time). */
