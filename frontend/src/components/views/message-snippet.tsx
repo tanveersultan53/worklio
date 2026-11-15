@@ -7,6 +7,7 @@ import { StatusEmoji } from "@/components/profile/status-emoji";
 import { UserAvatar } from "@/components/chat/user-avatar";
 import { useWorkspace } from "@/components/workspace/provider";
 import type { Channel, Message } from "@/lib/api";
+import { markdownToMessage } from "@/lib/ai";
 import { formatMessage } from "@/lib/format";
 import { dayLabel, timeLabel } from "@/lib/messages";
 import { cn } from "@/lib/utils";
@@ -82,7 +83,8 @@ export function MessageSnippet({
           {deleted ? (
             <em className="text-muted-foreground">This message was deleted.</em>
           ) : m.body ? (
-            formatMessage(m.body, { names: ws.memberById, meId: ws.me?.id })
+            // AI answers are Markdown with [n] citations; previews show them as plain message text.
+            formatMessage(m.meta?.type === "ai_agent" ? markdownToMessage(m.body) : m.body, { names: ws.memberById, meId: ws.me?.id })
           ) : m.attachments.length ? (
             <span className="inline-flex items-center gap-1 text-muted-foreground">
               <Paperclip className="size-3.5" />

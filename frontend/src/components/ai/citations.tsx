@@ -37,10 +37,13 @@ export function CitationChip({
   n,
   citation,
   onJump,
+  label,
 }: {
   n: number;
   citation: AICitation | undefined;
   onJump?: (c: AICitation) => void;
+  /** Shown instead of `n` (e.g. "6–12" for a range; opens the first source). */
+  label?: string;
 }) {
   const ws = useWorkspace();
   const author = citation ? (ws.memberById[citation.author_id]?.full_name ?? "Someone") : "";
@@ -54,7 +57,7 @@ export function CitationChip({
       aria-label={citation ? `Source ${n}: message from ${author}. Open message` : `Source ${n}`}
       className="mx-px inline-flex h-[1.15rem] min-w-[1.15rem] -translate-y-px items-center justify-center rounded-md bg-violet-500/12 px-1 align-middle text-[10.5px] font-bold text-violet-700 tabular-nums transition-colors hover:bg-violet-500/25 disabled:cursor-default disabled:opacity-70 dark:bg-violet-400/15 dark:text-violet-200 dark:hover:bg-violet-400/30"
     >
-      {n}
+      {label ?? n}
     </button>
   );
 }
