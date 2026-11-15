@@ -11,6 +11,7 @@ import { editLast, sameScope } from "@/lib/edit-last";
 import { dayLabel } from "@/lib/messages";
 import { errorMessage, toast } from "@/lib/toast";
 
+import { DateJumpPill } from "./date-jump";
 import { MessageItem } from "./message-item";
 
 const GROUP_WINDOW_MS = 5 * 60_000;
@@ -222,9 +223,13 @@ export function MessageList({
                 {newDay && (
                   <div className="sticky top-0 z-[5] flex items-center py-2">
                     <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
-                    <span className="relative mx-auto rounded-full border bg-background px-4 py-1 text-[13px] font-bold shadow-xs">
-                      {dayLabel(m.created_at)}
-                    </span>
+                    {m.parent_id ? (
+                      <span className="relative mx-auto rounded-full border bg-background px-4 py-1 text-[13px] font-bold shadow-xs">
+                        {dayLabel(m.created_at)}
+                      </span>
+                    ) : (
+                      <DateJumpPill label={dayLabel(m.created_at)} channelId={m.channel_id} onJumpToLatest={onJumpToLatest} />
+                    )}
                   </div>
                 )}
                 {isFirstUnread && (
