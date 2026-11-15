@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, CalendarPlus, Check, Download, Headphones, MoreHorizontal, Pencil, Video, X } from "lucide-react";
+import { CalendarPlus, Check, Download, Headphones, MoreHorizontal, Pencil, Video, X } from "lucide-react";
 import { useState } from "react";
 
 import { CallAvatarStack } from "@/components/calls/avatar-stack";
@@ -85,6 +85,7 @@ export function MeetingCard({ meeting: m, compact = false }: { meeting: Meeting;
     }
   }
 
+  // Only unusual states get a pill; an upcoming meeting just says when, in plain words.
   const status = cancelled ? (
     <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">Cancelled</span>
   ) : live ? (
@@ -94,68 +95,89 @@ export function MeetingCard({ meeting: m, compact = false }: { meeting: Meeting;
     </span>
   ) : over ? (
     <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">Ended</span>
-  ) : (
-    <span className="rounded-full bg-sky-500/12 px-2 py-0.5 text-[11px] font-semibold text-sky-700 dark:text-sky-300">
-      Starts {relativeStart(m, now)}
-    </span>
-  );
+  ) : null;
+
+  const counts = [
+    { n: going.length, label: "going", cls: "text-emerald-700 dark:text-emerald-300" },
+    { n: maybe, label: "maybe", cls: "text-amber-700 dark:text-amber-300" },
+    { n: declined, label: "can't go", cls: "text-red-600 dark:text-red-400" },
+    { n: waiting, label: "waiting", cls: "text-muted-foreground" },
+  ].filter((c) => c.n > 0);
+  const isOrganizer = m.organizer_id === me?.id;
+  const accent = cancelled || over ? "before:bg-muted-foreground/30" : live ? "before:bg-emerald-500" : "before:bg-[#e5375f]";
 
   return (
     <article
       aria-label={`Meeting: ${m.title}`}
       className={cn(
-        "mt-1 w-full max-w-lg overflow-hidden rounded-xl border bg-card text-card-foreground",
-        cancelled && "opacity-75",
+        "relative mt-1 w-full max-w-lg overflow-hidden rounded-xl border bg-card text-card-foreground shadow-xs",
+        // A thin colour bar on the left says upcoming / live / over at a glance.
+        "before:absolute before:inset-y-0 before:left-0 before:w-1",
+        accent,
+        cancelled && "opacity-80",
       )}
     >
-      <div className="flex gap-3 p-3">
+      <div className="flex items-start gap-3 py-3 pr-2 pl-4">
         <div
           aria-hidden
           className={cn(
-            "flex w-12 shrink-0 flex-col items-center overflow-hidden rounded-lg border text-center",
+            "flex h-[52px] w-12 shrink-0 flex-col items-center overflow-hidden rounded-lg border text-center",
             cancelled ? "bg-muted" : "bg-background",
           )}
         >
-          <span className={cn("w-full py-0.5 text-[10px] font-bold text-white uppercase", cancelled ? "bg-muted-foreground" : "bg-[#e5375f]")}>
+          <span className={cn("w-full py-0.5 text-[10px] leading-tight font-bold text-white uppercase", cancelled || over ? "bg-muted-foreground" : "bg-[#e5375f]")}>
             {start.toLocaleDateString(undefined, { month: "short" })}
           </span>
-          <span className="py-1 text-lg leading-none font-black tabular-nums">{start.getDate()}</span>
+          <span className="flex flex-1 items-center text-lg leading-none font-black tabular-nums">{start.getDate()}</span>
         </div>
+
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 className={cn("min-w-0 truncate text-[15px] font-bold", cancelled && "line-through")}>{m.title}</h3>
-            {status}
+          <div className="flex items-start gap-2">
+            <h3 className={cn("min-w-0 flex-1 text-[15px] leading-snug font-bold [overflow-wrap:anywhere]", cancelled && "line-through")}>
+              {m.title}
+            </h3>
+            {status && <span className="mt-0.5 shrink-0">{status}</span>}
           </div>
-          <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-muted-foreground">
-            {m.kind === "video" ? <Video className="size-3.5" aria-hidden /> : <Headphones className="size-3.5" aria-hidden />}
-            {whenLabel(m)}
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[13px] text-muted-foreground">
+            {m.kind === "video" ? <Video className="size-3.5 shrink-0" aria-hidden /> : <Headphones className="size-3.5 shrink-0" aria-hidden />}
+            <span>{whenLabel(m)}</span>
+            {!cancelled && !over && !live && <span className="text-foreground/70">· {relativeStart(m, now)}</span>}
           </p>
+
           {!compact && m.description && (
-            <p className="mt-1.5 line-clamp-3 text-[13px] whitespace-pre-wrap">{m.description}</p>
+            <div className="mt-2 border-l-2 border-border pl-2.5">
+              <p className="text-[11px] font-semibold text-muted-foreground">Agenda</p>
+              <p className="line-clamp-3 text-[13px] whitespace-pre-wrap [overflow-wrap:anywhere]">{m.description}</p>
+            </div>
           )}
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {going.length > 0 && <CallAvatarStack ids={going} max={5} size="sm" ringClassName="ring-card" />}
-            <span>
-              {organizer} organized · {going.length} going
-              {maybe ? ` · ${maybe} maybe` : ""}
-              {declined ? ` · ${declined} can't` : ""}
-              {waiting ? ` · ${waiting} waiting` : ""}
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+            {m.attendees.length > 0 && (
+              <CallAvatarStack ids={[...going, ...m.attendees.filter((a) => a.response !== "accepted").map((a) => a.user_id)]} max={5} size="sm" ringClassName="ring-card" />
+            )}
+            <span className="flex flex-wrap items-center gap-x-1.5 text-muted-foreground">
+              {counts.map((c, i) => (
+                <span key={c.label} className={cn("font-semibold", c.cls)}>
+                  {i > 0 && <span className="mr-1.5 font-normal text-muted-foreground">·</span>}
+                  {c.n} {c.label}
+                </span>
+              ))}
             </span>
           </div>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {isOrganizer ? "You're organizing" : `Organized by ${organizer}`}
+          </p>
         </div>
+
         {(canManage || !cancelled) && (
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={<Button size="icon-sm" variant="ghost" aria-label="Meeting options" className="-mt-1 -mr-1 shrink-0" />}
-            >
+            <DropdownMenuTrigger render={<Button size="icon-sm" variant="ghost" aria-label="Meeting options" className="-mt-1 shrink-0" />}>
               <MoreHorizontal aria-hidden />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               {!cancelled && (
                 <>
-                  <DropdownMenuItem
-                    onClick={() => void downloadIcs(m).catch((err) => toast.error(errorMessage(err)))}
-                  >
+                  <DropdownMenuItem onClick={() => void downloadIcs(m).catch((err) => toast.error(errorMessage(err)))}>
                     <Download />
                     Download .ics
                   </DropdownMenuItem>
@@ -184,7 +206,7 @@ export function MeetingCard({ meeting: m, compact = false }: { meeting: Meeting;
       </div>
 
       {!cancelled && !over && (
-        <div className="flex flex-wrap items-center gap-2 border-t bg-muted/30 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2 border-t bg-muted/30 py-2 pr-3 pl-4">
           {canJoin && !inThis && (
             <Button
               size="sm"
@@ -196,9 +218,9 @@ export function MeetingCard({ meeting: m, compact = false }: { meeting: Meeting;
             </Button>
           )}
           {inThis && <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">You’re in this huddle</span>}
-          {m.organizer_id !== me?.id && (
+          {!isOrganizer ? (
             <div role="group" aria-label="Are you going?" className="ml-auto flex items-center gap-1">
-              <span className="mr-1 hidden text-xs text-muted-foreground sm:inline">Going?</span>
+              <span className="mr-1 text-xs text-muted-foreground">Going?</span>
               {(
                 [
                   ["accepted", "Yes", Check],
@@ -220,12 +242,18 @@ export function MeetingCard({ meeting: m, compact = false }: { meeting: Meeting;
                 </Button>
               ))}
             </div>
-          )}
-          {m.organizer_id === me?.id && !canJoin && (
-            <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <CalendarDays className="size-3.5" aria-hidden />
-              You’re organizing
-            </span>
+          ) : (
+            // The organizer's footer does something useful: put it in their own calendar.
+            <div className="ml-auto flex items-center gap-1">
+              <Button size="xs" variant="outline" className="gap-1" onClick={() => window.open(googleCalendarUrl(m, link), "_blank", "noopener")}>
+                <CalendarPlus aria-hidden />
+                Add to Google Calendar
+              </Button>
+              <Button size="xs" variant="ghost" className="gap-1" onClick={() => void downloadIcs(m).catch((err) => toast.error(errorMessage(err)))}>
+                <Download aria-hidden />
+                .ics
+              </Button>
+            </div>
           )}
         </div>
       )}
