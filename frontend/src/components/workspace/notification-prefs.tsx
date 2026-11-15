@@ -258,7 +258,7 @@ export function PrefSwitch({ checked, onChange, label }: { checked: boolean; onC
       onClick={() => onChange(!checked)}
       className={cn(
         "relative h-6 w-11 shrink-0 rounded-full transition focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-        checked ? "bg-side-active" : "bg-muted-foreground/30",
+        checked ? "bg-send" : "bg-muted-foreground/30",
       )}
     >
       <span className={cn("absolute top-0.5 size-5 rounded-full bg-white shadow transition-all", checked ? "left-[22px]" : "left-0.5")} />
@@ -418,7 +418,7 @@ export function NotificationsSection() {
                   prefs.desktop_notify === l.id ? "border-side-active" : "border-muted-foreground/50",
                 )}
               >
-                {prefs.desktop_notify === l.id && <span className="size-2 rounded-full bg-side-active" />}
+                {prefs.desktop_notify === l.id && <span className="size-2 rounded-full bg-send" />}
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-bold">{l.title}</span>

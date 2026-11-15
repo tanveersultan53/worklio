@@ -172,8 +172,8 @@
   --side-foreground: rgb(255 255 255 / 0.75);
   --side-strong: #ffffff;
   --side-hover: rgb(255 255 255 / 0.08);
-  --side-active: #1164a3;
-  --side-active-foreground: #ffffff;
+  --side-active: #f6e9f5;
+  --side-active-foreground: #3a1238;
   --badge: #cd2553;
   --badge-foreground: #ffffff;
   --link: #1264a3;
@@ -210,8 +210,8 @@
   --side-foreground: #b9babd;
   --side-strong: #ffffff;
   --side-hover: rgb(255 255 255 / 0.06);
-  --side-active: #1164a3;
-  --side-active-foreground: #ffffff;
+  --side-active: #e6d7e5;
+  --side-active-foreground: #2a0f28;
   --badge: #cd2553;
   --badge-foreground: #ffffff;
   --link: #1d9bd1;

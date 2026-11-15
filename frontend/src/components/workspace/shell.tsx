@@ -350,7 +350,7 @@ function ResizeHandle() {
       onPointerCancel={abort}
       onLostPointerCapture={abort}
     >
-      <div className="mx-auto h-full w-0.5 bg-transparent transition group-hover:bg-side-active" />
+      <div className="mx-auto h-full w-0.5 bg-transparent transition group-hover:bg-link" />
     </div>
   );
 }
